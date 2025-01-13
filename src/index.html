@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Speech to Text</title>
-
+    <title>Live Audio Transcription</title>
     <link href="./input.css" rel="stylesheet" />
     <link href="./output.css" rel="stylesheet" />
     <link
@@ -18,39 +17,28 @@
       <div class="relative min-w-[25%] duration-300 ease-in-out" id="myTopnav">
         <div class="fixed min-w-[25%]">
           <div class="mx-auto flex h-screen max-w-[85%] flex-col gap-12 pt-8">
-            <!-- logo -->
             <img
               src="https://www.spil.co.id/img/spil_logo.581f4306.svg"
               width="50"
             />
-
-            <!-- live transcript menu -->
             <div class="space-y-4">
               <ul class="menu w-full rounded-box bg-base-200">
-                <li>
-                  <h2 class="menu-title">Live Transcript</h2>
-                  <ul>
-                    <li>
-                      <button>Amazon Web Service (AWS)</button>
-                    </li>
-                    <li><button>Vertex AI</button></li>
-                  </ul>
-                </li>
+                <li><h2 class="menu-title">Live Transcript</h2></li>
+                <ul>
+                  <li><button>Amazon Web Service (AWS)</button></li>
+                  <li><button>Vertex AI</button></li>
+                </ul>
               </ul>
 
-              <!-- recorded transcript menu -->
               <ul class="menu w-full rounded-box bg-base-200">
-                <li>
-                  <h2 class="menu-title">Recorded Transcript</h2>
-                  <ul>
-                    <li><button>URL</button></li>
-                    <li><button>Audio File</button></li>
-                  </ul>
-                </li>
+                <li><h2 class="menu-title">Recorded Transcript</h2></li>
+                <ul>
+                  <li><button>URL</button></li>
+                  <li><button>Audio File</button></li>
+                </ul>
               </ul>
             </div>
 
-            <!-- copyright -->
             <p
               class="absolute bottom-8 left-1/2 -translate-x-1/2 transform text-sm"
             >
@@ -62,7 +50,6 @@
 
       <!-- right -->
       <div class="flex w-full flex-col gap-10 p-8">
-        <!-- navbar -->
         <nav
           class="navbar sticky top-8 z-50 gap-2 rounded-3xl bg-base-100 p-4 shadow-lg"
         >
@@ -70,8 +57,8 @@
           <div class="flex-none">
             <button
               class="btn btn-primary rounded-2xl"
-              onclick="startStopAudio('start')"
-              id="start-audio"
+              id="startListening"
+              onclick="startRecording()"
             >
               <i
                 class="fa-solid fa-microphone fa-sm"
@@ -84,8 +71,8 @@
           <div class="flex-1">
             <button
               class="btn btn-disabled btn-error rounded-2xl !text-white"
-              onclick="startStopAudio('stop')"
-              id="stop-audio"
+              id="stopListening"
+              onclick="stopRecording()"
             >
               <i class="fa-solid fa-stop fa-sm" style="color: #ffffff"></i>
               Stop Listening
@@ -102,99 +89,96 @@
         <!-- transcription result -->
         <div class="mx-auto w-[600px]">
           <div class="w-full space-y-4">
-            <div class="flex items-center gap-4">
-              <div class="avatar placeholder h-fit w-fit">
-                <div class="w-10 rounded-full bg-neutral text-neutral-content">
-                  <i
-                    class="fa-solid fa-calendar fa-sm"
-                    style="color: #ffffff"
-                  ></i>
-                </div>
-              </div>
-              <p class="text-sm" id="getDate"></p>
-            </div>
+            <div class="flex items-center gap-4" id="getDate"></div>
             <p class="text-sm">
               <span id="final" class="font-semibold"></span>
-              <span id="interim"></span>
+              <span id="transcription"></span>
             </p>
           </div>
         </div>
       </div>
     </section>
+
+    <script>
+      // open close navbar
+      function openCloseNav() {
+        var x = document.getElementById("myTopnav");
+        var before = "relative min-w-[25%] ";
+        var delay = "duration-300 ease-in-out";
+        if (x.className === before + delay) {
+          x.className = "fixed translate-x-[-100%] w-full " + delay;
+        } else {
+          x.className = before + delay;
+        }
+      }
+      
+      let recognition = null;
+      let isRecording = false;
+
+      function initializeSpeechRecognition() {
+        if (!recognition) {
+          recognition = new (window.SpeechRecognition ||
+            window.webkitSpeechRecognition)();
+          recognition.lang = "id-ID";
+          recognition.continuous = true;
+          recognition.interimResults = true;
+
+          recognition.onstart = () => updateStatus("Recording...");
+          recognition.onresult = (e) => {
+            document.getElementById("transcription").textContent = Array.from(
+              e.results,
+            )
+              .map((r) => r[0].transcript)
+              .join(" ");
+          };
+          recognition.onerror = (e) => updateStatus("Error: " + e.error);
+          recognition.onend = () =>
+            isRecording ? recognition.start() : updateStatus("Stopped");
+        }
+      }
+
+      function updateStatus(status) {
+        document.getElementById("status").innerText = status;
+      }
+
+      function startRecording() {
+        initializeSpeechRecognition();
+        recognition.start();
+        isRecording = true;
+        toggleButtons(true);
+        document.getElementById("getDate").innerHTML = `
+        <div class="flex items-center gap-4" id="getDate">
+          <div class="avatar placeholder h-fit w-fit">
+            <div class="w-10 rounded-full bg-neutral text-neutral-content">
+              <i
+                class="fa-solid fa-calendar fa-sm"
+                style="color: #ffffff"
+              ></i>
+            </div>
+          </div>
+          <p class="text-sm">${new Date()}</p>
+        </div>
+        `;
+      }
+
+      function stopRecording() {
+        recognition.stop();
+        isRecording = false;
+        toggleButtons(false);
+      }
+
+      const startListening = document.getElementById("startListening");
+      const stopListening = document.getElementById("stopListening");
+
+      function toggleButtons(isRecording) {
+        if (isRecording) {
+          startListening.classList.add("hidden");
+          stopListening.classList.remove("btn-disabled");
+        } else {
+          startListening.classList.remove("hidden");
+          stopListening.classList.add("btn-disabled");
+        }
+      }
+    </script>
   </body>
 </html>
-
-<script>
-  let socket = null;
-
-  // open close navbar
-  function openCloseNav() {
-    var x = document.getElementById("myTopnav");
-    var before = "relative min-w-[25%] ";
-    var delay = "duration-300 ease-in-out";
-    if (x.className === before + delay) {
-      x.className = "fixed translate-x-[-100%] w-full " + delay;
-    } else {
-      x.className = before + delay;
-    }
-  }
-
-  function startStopAudio(command) {
-    // start and stop websocket
-    if (socket) {
-      if (socket.readyState === WebSocket.OPEN) {
-        if (command === "stop") {
-          socket.send("stop");
-          setTimeout(() => {
-            socket.close();
-          }, 1000);
-        }
-      } else {
-        console.log("cannot send stop command because websocket is not open");
-      }
-    } else {
-      socket = new WebSocket("ws://localhost:8765");
-
-      socket.onopen = () => {
-        console.log("connected to server!");
-        if (command === "start") {
-          socket.send("start");
-        }
-      };
-
-      // live transcript
-      let lastTranscript = "";
-
-      socket.onmessage = (event) => {
-        const transcriptChar = event.data;
-
-        if (transcriptChar !== lastTranscript) {
-          lastTranscript = transcriptChar;
-          if (transcriptChar.slice(0, 6) === "final:") {
-            const finalDiv = document.getElementById("final");
-            finalDiv.innerHTML += transcriptChar.slice(7);
-            finalDiv.scrollTop = finalDiv.scrollHeight;
-          } else {
-            const interimDiv = document.getElementById("interim");
-            interimDiv.textContent = transcriptChar;
-            interimDiv.scrollTop = interimDiv.scrollHeight;
-          }
-        }
-      };
-    }
-
-    // start and stop button interface
-    const startButton = document.getElementById("start-audio");
-    const stopButton = document.getElementById("stop-audio");
-
-    if (command === "start") {
-      startButton.classList.add("hidden");
-      stopButton.classList.remove("btn-disabled");
-    } else if (command === "stop") {
-      startButton.classList.remove("hidden");
-      stopButton.classList.add("btn-disabled");
-    }
-
-    document.getElementById("getDate").innerHTML = new Date();
-  }
-</script>

@@ -1,1 +1,5 @@
+*.html
+*.json
+*.py
+!src/*.html
 node_modules
