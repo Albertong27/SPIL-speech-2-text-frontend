@@ -100,13 +100,24 @@
         </nav>
 
         <!-- transcription result -->
-        <div class="flex justify-start gap-4 px-4">
-          <div class="avatar placeholder h-fit w-fit">
-            <div class="w-10 rounded-full bg-neutral text-neutral-content">
-              <i class="fa-brands fa-google fa-sm" style="color: #ffffff"></i>
+        <div class="flex gap-4">
+          <div class="w-full space-y-4 px-4">
+            <div class="flex items-center gap-4">
+              <div class="avatar placeholder h-fit w-fit">
+                <div class="w-10 rounded-full bg-neutral text-neutral-content">
+                  <i
+                    class="fa-solid fa-calendar fa-sm"
+                    style="color: #ffffff"
+                  ></i>
+                </div>
+              </div>
+              <p class="text-sm" id="getDate"></p>
             </div>
+            <div id="final"></div>
           </div>
-          <div id="transcript"></div>
+          <div class="w-full h-fit rounded-xl bg-[#E7E7E7] p-4">
+            <p id="interim"></p>
+          </div>
         </div>
       </div>
     </section>
@@ -159,9 +170,15 @@
 
         if (transcriptChar !== lastTranscript) {
           lastTranscript = transcriptChar;
-          const transcriptDiv = document.getElementById("transcript");
-          transcriptDiv.textContent = transcriptChar;
-          transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+          if (transcriptChar.slice(0, 6) === "final:") {
+            const finalDiv = document.getElementById("final");
+            finalDiv.innerHTML += `<p>${transcriptChar.slice(7)}</p> <br />`;
+            finalDiv.scrollTop = finalDiv.scrollHeight;
+          } else {
+            const interimDiv = document.getElementById("interim");
+            interimDiv.textContent = transcriptChar;
+            interimDiv.scrollTop = interimDiv.scrollHeight;
+          }
         }
       };
     }
@@ -177,5 +194,7 @@
       startButton.classList.remove("hidden");
       stopButton.classList.add("btn-disabled");
     }
+
+    document.getElementById("getDate").innerHTML = new Date();
   }
 </script>
