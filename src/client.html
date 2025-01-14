@@ -102,17 +102,7 @@
         <!-- transcription result -->
         <div class="mx-auto w-[600px]">
           <div class="w-full space-y-4">
-            <div class="flex items-center gap-4">
-              <div class="avatar placeholder h-fit w-fit">
-                <div class="w-10 rounded-full bg-neutral text-neutral-content">
-                  <i
-                    class="fa-solid fa-calendar fa-sm"
-                    style="color: #ffffff"
-                  ></i>
-                </div>
-              </div>
-              <p class="text-sm" id="getDate"></p>
-            </div>
+            <div class="flex items-center gap-4" id="getDate"></div>
             <p class="text-sm">
               <span id="final" class="font-semibold"></span>
               <span id="interim"></span>
@@ -195,6 +185,18 @@
       stopListening.classList.add("btn-disabled");
     }
 
-    document.getElementById("getDate").innerHTML = new Date();
+    document.getElementById("getDate").innerHTML = `
+      <div class="flex items-center gap-2">
+        <div class="avatar placeholder h-fit w-fit">
+          <div class="w-10 rounded-full bg-neutral text-neutral-content">
+            <i
+              class="fa-solid fa-calendar fa-sm"
+              style="color: #ffffff"
+            ></i>
+          </div>
+        </div>
+        <p class="text-sm">${new Date()}</p>
+      </div>
+      `;
   }
 </script>
