@@ -12,6 +12,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     />
   </head>
+
   <body>
     <section class="flex justify-center">
       <!-- left -->
@@ -103,7 +104,7 @@
         <div class="mx-auto w-[600px]">
           <div class="w-full space-y-4">
             <div class="flex items-center gap-4" id="getDate"></div>
-            <p class="text-sm">
+            <p>
               <span id="final" class="font-semibold"></span>
               <span id="interim"></span>
             </p>
@@ -115,7 +116,10 @@
 </html>
 
 <script>
-  let socket = null;
+  let ws = null;
+  let micStream = null;
+  let audioContext = null;
+  let micProcessor = null;
 
   // open close navbar
   function openCloseNav() {
@@ -129,50 +133,7 @@
     }
   }
 
-  function startStopAudio(command) {
-    // start and stop websocket
-    if (socket) {
-      if (socket.readyState === WebSocket.OPEN) {
-        if (command === "stop") {
-          socket.send("stop");
-          setTimeout(() => {
-            socket.close();
-          }, 1000);
-        }
-      } else {
-        console.log("cannot send stop command because websocket is not open");
-      }
-    } else {
-      socket = new WebSocket("ws://localhost:8765");
-
-      socket.onopen = () => {
-        console.log("connected to server!");
-        if (command === "start") {
-          socket.send("start");
-        }
-      };
-
-      // live transcript
-      let lastTranscript = "";
-
-      socket.onmessage = (event) => {
-        const transcriptChar = event.data;
-
-        if (transcriptChar !== lastTranscript) {
-          lastTranscript = transcriptChar;
-          if (transcriptChar.slice(0, 6) === "final:") {
-            const finalDiv = document.getElementById("final");
-            finalDiv.innerHTML += transcriptChar.slice(7);
-            finalDiv.scrollTop = finalDiv.scrollHeight;
-          } else {
-            const interimDiv = document.getElementById("interim");
-            interimDiv.textContent = transcriptChar;
-            interimDiv.scrollTop = interimDiv.scrollHeight;
-          }
-        }
-      };
-    }
-
+  async function startStopAudio(command) {
     // start and stop button interface
     const startListening = document.getElementById("startListening");
     const stopListening = document.getElementById("stopListening");
@@ -186,17 +147,86 @@
     }
 
     document.getElementById("getDate").innerHTML = `
-      <div class="flex items-center gap-2">
-        <div class="avatar placeholder h-fit w-fit">
-          <div class="w-10 rounded-full bg-neutral text-neutral-content">
-            <i
-              class="fa-solid fa-calendar fa-sm"
-              style="color: #ffffff"
-            ></i>
-          </div>
+    <div class="flex items-center gap-2">
+      <div class="avatar placeholder h-fit w-fit">
+        <div class="w-10 rounded-full bg-neutral text-neutral-content">
+          <i
+            class="fa-solid fa-calendar fa-sm"
+            style="color: #ffffff"
+          ></i>
         </div>
-        <p class="text-sm">${new Date()}</p>
       </div>
-      `;
+      <p class="text-sm">${new Date()}</p>
+    </div>
+    `;
+
+    if (!ws) {
+      ws = new WebSocket("ws://localhost:8080");
+
+      // live transcript
+      let lastTranscript = "";
+
+      ws.onmessage = (event) => {
+        const transcriptChar = event.data;
+
+        if (transcriptChar !== lastTranscript) {
+          lastTranscript = transcriptChar;
+          if (transcriptChar.slice(0, 6) === "final:") {
+            const finalDiv = document.getElementById("final");
+            finalDiv.innerHTML += transcriptChar.slice(6);
+            finalDiv.scrollTop = finalDiv.scrollHeight;
+          } else {
+            const interimDiv = document.getElementById("interim");
+            interimDiv.textContent = transcriptChar;
+            interimDiv.scrollTop = interimDiv.scrollHeight;
+          }
+        }
+      };
+
+      async function initAudio() {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+        }
+      }
+
+      if (command === "start") {
+        try {
+          await initAudio();
+          micStream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          const source = audioContext.createMediaStreamSource(micStream);
+
+          micProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+          source.connect(micProcessor);
+          micProcessor.connect(audioContext.destination);
+
+          micProcessor.onaudioprocess = (e) => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              const inputData = e.inputBuffer.getChannelData(0);
+              const samples = new Int16Array(inputData.length);
+              for (let i = 0; i < inputData.length; i++) {
+                samples[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7fff;
+              }
+              ws.send(samples.buffer);
+            }
+          };
+        } catch (e) {
+          console.error(error);
+        }
+      }
+
+      if (command === "stop") {
+        if (micStream) {
+          micStream.getTracks().forEach((track) => track.stop());
+          if (micProcessor) {
+            micProcessor.disconnect();
+            micProcessor = null;
+          }
+          micStream = null;
+        }
+      }
+    }
   }
 </script>
