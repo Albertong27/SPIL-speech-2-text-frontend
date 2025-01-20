@@ -105,8 +105,8 @@
           <div class="w-full space-y-4">
             <div class="flex items-center gap-4" id="getDate"></div>
             <p>
-              <span id="final" class="font-semibold"></span>
-              <span id="interim"></span>
+              <span class="font-semibold" id="final"></span>
+              <span class="text-gray-500" id="interim"></span>
             </p>
           </div>
         </div>
@@ -161,7 +161,7 @@
     `;
 
     if (!ws) {
-      ws = new WebSocket("ws://localhost:8080");
+      ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
 
       // live transcript
       let lastTranscript = "";
@@ -183,49 +183,57 @@
         }
       };
 
-      async function initAudio() {
-        if (!audioContext) {
-          audioContext = new (window.AudioContext ||
-            window.webkitAudioContext)();
-        }
+      ws.onclose = () => {
+        ws = null;
+      };
+
+      ws.onerror = () => {
+        ws = null;
+      };
+    }
+
+    async function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)({
+          sampleRate: 16000,
+        });
       }
+    }
 
-      if (command === "start") {
-        try {
-          await initAudio();
-          micStream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-          });
-          const source = audioContext.createMediaStreamSource(micStream);
+    if (command === "start") {
+      try {
+        await initAudio();
+        micStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        const source = audioContext.createMediaStreamSource(micStream);
 
-          micProcessor = audioContext.createScriptProcessor(4096, 1, 1);
-          source.connect(micProcessor);
-          micProcessor.connect(audioContext.destination);
+        micProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+        source.connect(micProcessor);
+        micProcessor.connect(audioContext.destination);
 
-          micProcessor.onaudioprocess = (e) => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-              const inputData = e.inputBuffer.getChannelData(0);
-              const samples = new Int16Array(inputData.length);
-              for (let i = 0; i < inputData.length; i++) {
-                samples[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7fff;
-              }
-              ws.send(samples.buffer);
+        micProcessor.onaudioprocess = (e) => {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            const inputData = e.inputBuffer.getChannelData(0);
+            const samples = new Int16Array(inputData.length);
+            for (let i = 0; i < inputData.length; i++) {
+              samples[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7fff;
             }
-          };
-        } catch (e) {
-          console.error(error);
-        }
+            ws.send(samples.buffer);
+          }
+        };
+      } catch (e) {
+        console.error(error);
+      }
+    } else if (command === "stop") {
+      if (micStream) {
+        micStream.getTracks().forEach((track) => track.stop());
+        micStream = null;
       }
 
-      if (command === "stop") {
-        if (micStream) {
-          micStream.getTracks().forEach((track) => track.stop());
-          if (micProcessor) {
-            micProcessor.disconnect();
-            micProcessor = null;
-          }
-          micStream = null;
-        }
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.close();
+        ws = null;
       }
     }
   }
