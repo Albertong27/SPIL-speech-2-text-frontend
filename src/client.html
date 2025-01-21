@@ -5,8 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Speech to Text</title>
 
+    <!-- tailwind -->
     <link href="./input.css" rel="stylesheet" />
     <link href="./output.css" rel="stylesheet" />
+
+    <!-- font poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- font awesome -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
@@ -14,7 +25,7 @@
   </head>
 
   <body>
-    <section class="flex justify-center">
+    <section class="flex justify-center font-poppins">
       <!-- left -->
       <div class="relative min-w-[25%] duration-300 ease-in-out" id="myTopnav">
         <div class="fixed min-w-[25%]">
@@ -62,7 +73,7 @@
       </div>
 
       <!-- right -->
-      <div class="flex w-full flex-col gap-10 p-8">
+      <div class="flex w-full flex-col gap-10 py-8 pl-8">
         <!-- navbar -->
         <nav
           class="navbar sticky top-8 z-50 gap-2 rounded-3xl bg-base-100 p-4 shadow-lg"
@@ -71,25 +82,36 @@
           <div class="flex-none">
             <button
               class="btn btn-primary rounded-2xl"
-              onclick="startStopAudio('start')"
               id="startListening"
+              onclick="startStopAudio('start')"
             >
               <i
                 class="fa-solid fa-microphone fa-sm"
                 style="color: #ffffff"
               ></i>
-              Start Listening with Vertex
+              Start Listening with AWS
             </button>
           </div>
           <!-- stop record -->
-          <div class="flex-1">
+          <div class="flex">
             <button
-              class="btn btn-disabled btn-error rounded-2xl !text-white"
-              onclick="startStopAudio('stop')"
+              class="btn btn-disabled btn-error hidden rounded-2xl !text-white"
               id="stopListening"
+              onclick="my_modal_1.showModal()"
             >
               <i class="fa-solid fa-stop fa-sm" style="color: #ffffff"></i>
               Stop Listening
+            </button>
+          </div>
+          <!-- pause record -->
+          <div class="flex-1">
+            <button
+              class="btn btn-info hidden rounded-xl !text-white"
+              id="pauseListening"
+              onclick="startStopAudio('pause')"
+            >
+              <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
+              Pause Listening
             </button>
           </div>
           <!-- hamburger menu -->
@@ -101,16 +123,43 @@
         </nav>
 
         <!-- transcription result -->
-        <div class="mx-auto w-[600px]">
-          <div class="w-full space-y-4">
-            <div class="flex items-center gap-4" id="getDate"></div>
-            <p>
-              <span class="font-semibold" id="final"></span>
-              <span class="text-gray-500" id="interim"></span>
-            </p>
+        <div class="mx-auto flex w-[500px] gap-6">
+          <div class="space-y-4">
+            <div class="space-y-6" id="getDate"></div>
           </div>
         </div>
       </div>
+
+      <!-- live preview -->
+      <div class="my-8 ml-8 w-[600px] space-y-6 overflow-auto">
+        <div class="flex items-center gap-3">
+          <div class="avatar placeholder h-fit w-fit">
+            <div class="w-10 rounded-full bg-neutral text-neutral-content">
+              <i class="fa-solid fa-calendar fa-sm" style="color: #ffffff"></i>
+            </div>
+          </div>
+          <p class="text-sm">Tue Jan 21 2025 19:27:02</p>
+        </div>
+        <p class="mr-8 text-sm" id="interim"></p>
+      </div>
+
+      <!-- stop listening modal -->
+      <dialog id="my_modal_1" class="modal">
+        <div class="modal-box">
+          <p class="py-4">Are you sure you want to "Stop Listening"?</p>
+          <div class="modal-action">
+            <form method="dialog" class="space-x-1">
+              <button
+                class="btn btn-outline btn-error rounded-2xl hover:!text-white"
+                onclick="startStopAudio('stop')"
+              >
+                Yes
+              </button>
+              <button class="btn rounded-xl">Close</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </section>
   </body>
 </html>
@@ -133,62 +182,75 @@
     }
   }
 
+  async function cleanupAudioResources() {
+    if (micProcessor) {
+      micProcessor.disconnect();
+      micProcessor = null;
+    }
+    if (micStream) {
+      micStream.getTracks().forEach((track) => track.stop());
+      micStream = null;
+    }
+    if (audioContext && audioContext.state !== "closed") {
+      await audioContext.close();
+      audioContext = null;
+    }
+  }
+
   async function startStopAudio(command) {
     // start and stop button interface
     const startListening = document.getElementById("startListening");
     const stopListening = document.getElementById("stopListening");
-
-    if (command === "start") {
-      startListening.classList.add("hidden");
-      stopListening.classList.remove("btn-disabled");
-    } else if (command === "stop") {
-      startListening.classList.remove("hidden");
-      stopListening.classList.add("btn-disabled");
-    }
+    const pauseListening = document.getElementById("pauseListening");
 
     document.getElementById("getDate").innerHTML = `
-    <div class="flex items-center gap-2">
-      <div class="avatar placeholder h-fit w-fit">
-        <div class="w-10 rounded-full bg-neutral text-neutral-content">
-          <i
-            class="fa-solid fa-calendar fa-sm"
-            style="color: #ffffff"
-          ></i>
+    <div class="space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="avatar placeholder h-fit w-fit">
+          <div class="w-10 rounded-full bg-neutral text-neutral-content">
+            <i class="fa-solid fa-calendar fa-sm" style="color: #ffffff"></i>
+          </div>
         </div>
+        <p class="text-sm">${new Date().toString().split(" GMT")[0]}</p>
       </div>
-      <p class="text-sm">${new Date()}</p>
     </div>
+    <p>
+      <span class="font-semibold" id="final"></span>
+    </p>
     `;
 
-    if (!ws) {
-      ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
+    async function initWebSocket() {
+      if (!ws) {
+        ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
 
-      // live transcript
-      let lastTranscript = "";
+        // live transcript
+        let lastTranscript = "";
 
-      ws.onmessage = (event) => {
-        const transcriptChar = event.data;
+        ws.onmessage = (event) => {
+          const transcriptChar = event.data;
 
-        if (transcriptChar !== lastTranscript) {
-          lastTranscript = transcriptChar;
-          if (transcriptChar.slice(0, 6) === "final:") {
-            const finalDiv = document.getElementById("final");
-            finalDiv.innerHTML += transcriptChar.slice(6);
-            finalDiv.scrollTop = finalDiv.scrollHeight;
-          } else {
-            const interimDiv = document.getElementById("interim");
-            interimDiv.textContent = transcriptChar;
-            interimDiv.scrollTop = interimDiv.scrollHeight;
+          if (transcriptChar !== lastTranscript) {
+            lastTranscript = transcriptChar.toLowerCase();
+            console.log(lastTranscript);
+            if (transcriptChar.slice(0, 6) === "final:") {
+              const finalDiv = document.getElementById("final");
+              finalDiv.innerHTML += transcriptChar.slice(6);
+              finalDiv.scrollTop = finalDiv.scrollHeight;
+            } else {
+              const interimDiv = document.getElementById("interim");
+              interimDiv.innerHTML += `${transcriptChar} <br /> <hr class="my-1" />`;
+              interimDiv.scrollTop = interimDiv.scrollHeight;
+            }
           }
-        }
-      };
+        };
+      }
 
       ws.onclose = () => {
-        ws = null;
+        console.log("Websocket closed");
       };
 
       ws.onerror = () => {
-        ws = null;
+        console.log("Websocket error");
       };
     }
 
@@ -201,14 +263,24 @@
     }
 
     if (command === "start") {
+      // button action
+      startListening.classList.add("hidden");
+      stopListening.classList.remove("btn-disabled", "hidden");
+      pauseListening.classList.remove("hidden", "btn-disabled");
+
+      // start websocket and activate microphone
       try {
+        await cleanupAudioResources();
+        await initWebSocket();
+
         await initAudio();
         micStream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
-        const source = audioContext.createMediaStreamSource(micStream);
 
+        const source = audioContext.createMediaStreamSource(micStream);
         micProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+
         source.connect(micProcessor);
         micProcessor.connect(audioContext.destination);
 
@@ -222,19 +294,52 @@
             ws.send(samples.buffer);
           }
         };
-      } catch (e) {
+      } catch (error) {
         console.error(error);
+        await cleanupAudioResources();
       }
-    } else if (command === "stop") {
+    }
+
+    // stop microphone
+    else if (command === "stop") {
+      await cleanupAudioResources();
+      await initWebSocket();
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+
+      // button
+      startListening.classList.remove("hidden");
+      startListening.innerHTML = `
+      <i
+        class="fa-solid fa-microphone fa-sm"
+        style="color: #ffffff"
+      ></i>
+      Start Listening with AWS
+    `;
+      stopListening.classList.add("hidden");
+      pauseListening.classList.add("hidden");
+    }
+
+    // pause microphone
+    else if (command === "pause") {
+      // microphone
       if (micStream) {
         micStream.getTracks().forEach((track) => track.stop());
         micStream = null;
       }
 
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.close();
-        ws = null;
-      }
+      // button
+      startListening.classList.remove("hidden");
+      startListening.innerHTML = `
+      <i
+        class="fa-solid fa-play fa-sm"
+        style="color: #ffffff"
+      ></i>
+      Continue Listening with AWS
+    `;
+      stopListening.classList.add("hidden");
+      pauseListening.classList.add("hidden");
     }
   }
 </script>
