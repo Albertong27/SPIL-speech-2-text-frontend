@@ -9,11 +9,11 @@
     <link href="./input.css" rel="stylesheet" />
     <link href="./output.css" rel="stylesheet" />
 
-    <!-- font poppins -->
+    <!-- font poppins and roboto mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
       rel="stylesheet"
     />
 
@@ -24,8 +24,16 @@
     />
   </head>
 
-  <body>
-    <section class="flex justify-center font-poppins">
+  <body class="font-poppins">
+    <!-- log preview -->
+    <section
+      class="fixed bottom-0 z-40 hidden h-[50vh] w-full overflow-auto bg-[#F9F9F9]"
+      id="logPreview"
+    >
+      <p class="mx-auto w-[500px] py-8 text-center" id="interim"></p>
+    </section>
+
+    <section class="flex justify-center">
       <!-- left -->
       <div class="relative min-w-[25%] duration-300 ease-in-out" id="myTopnav">
         <div class="fixed min-w-[25%]">
@@ -43,7 +51,7 @@
                   <h2 class="menu-title">Live Transcript</h2>
                   <ul>
                     <li>
-                      <button>Amazon Web Service (AWS)</button>
+                      <button class="active">Amazon Web Service (AWS)</button>
                     </li>
                     <li><button>Vertex AI</button></li>
                   </ul>
@@ -73,15 +81,22 @@
       </div>
 
       <!-- right -->
-      <div class="flex w-full flex-col gap-10 py-8 pl-8">
+      <div class="mx-auto flex w-full flex-col gap-10 p-8">
         <!-- navbar -->
         <nav
-          class="navbar sticky top-8 z-50 gap-2 rounded-3xl bg-base-100 p-4 shadow-lg"
+          class="navbar sticky top-8 z-30 flex gap-2 rounded-3xl bg-base-100 p-4 shadow-lg"
         >
-          <!-- start record -->
-          <div class="flex-none">
+          <!-- hamburger menu -->
+          <div class="navbar-start">
+            <button class="btn btn-square rounded-xl" onclick="openClose.Nav()">
+              <i class="fa-solid fa-bars" style="color: #000000"></i>
+            </button>
+          </div>
+
+          <div class="navbar-center">
+            <!-- start record -->
             <button
-              class="btn btn-primary rounded-2xl"
+              class="btn btn-primary flex-none rounded-2xl"
               id="startListening"
               onclick="startStopAudio('start')"
             >
@@ -91,20 +106,18 @@
               ></i>
               Start Listening with AWS
             </button>
-          </div>
-          <!-- stop record -->
-          <div class="flex">
+
+            <!-- stop record -->
             <button
-              class="btn btn-disabled btn-error hidden rounded-2xl !text-white"
+              class="btn btn-disabled btn-error mr-2 hidden rounded-2xl !text-white"
               id="stopListening"
               onclick="my_modal_1.showModal()"
             >
               <i class="fa-solid fa-stop fa-sm" style="color: #ffffff"></i>
               Stop Listening
             </button>
-          </div>
-          <!-- pause record -->
-          <div class="flex-1">
+
+            <!-- pause record -->
             <button
               class="btn btn-info hidden rounded-xl !text-white"
               id="pauseListening"
@@ -114,33 +127,26 @@
               Pause Listening
             </button>
           </div>
-          <!-- hamburger menu -->
-          <div class="flex-none">
-            <button class="btn btn-square rounded-xl" onclick="openCloseNav()">
-              <i class="fa-solid fa-bars" style="color: #000000"></i>
+
+          <div class="navbar-end">
+            <button
+              class="btn btn-square btn-neutral z-50 flex-none rounded-xl"
+              onclick="openClose.logPreview()"
+            >
+              <i class="fa-solid fa-clock-rotate-left"></i>
             </button>
           </div>
         </nav>
 
         <!-- transcription result -->
-        <div class="mx-auto flex w-[500px] gap-6">
-          <div class="space-y-4">
-            <div class="space-y-6" id="getDate"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- live preview -->
-      <div class="my-8 ml-8 w-[600px] space-y-6 overflow-auto">
-        <div class="flex items-center gap-3">
-          <div class="avatar placeholder h-fit w-fit">
-            <div class="w-10 rounded-full bg-neutral text-neutral-content">
-              <i class="fa-solid fa-calendar fa-sm" style="color: #ffffff"></i>
+        <div class="mx-auto flex w-[500px] gap-8" id="transcription">
+          <div class="flex w-full gap-4">
+            <div class="space-y-6 text-justify">
+              <div id="getDate"></div>
+              <p><span class="font-semibold" id="final"></span></p>
             </div>
           </div>
-          <p class="text-sm">Tue Jan 21 2025 19:27:02</p>
         </div>
-        <p class="mr-8 text-sm" id="interim"></p>
       </div>
 
       <!-- stop listening modal -->
@@ -170,17 +176,34 @@
   let audioContext = null;
   let micProcessor = null;
 
-  // open close navbar
-  function openCloseNav() {
-    var x = document.getElementById("myTopnav");
-    var before = "relative min-w-[25%] ";
-    var delay = "duration-300 ease-in-out";
-    if (x.className === before + delay) {
-      x.className = "fixed translate-x-[-100%] w-full " + delay;
-    } else {
-      x.className = before + delay;
+  const openClose = (function () {
+    // open close navbar
+    function Nav() {
+      var x = document.getElementById("myTopnav");
+      var before = "relative min-w-[25%] ";
+      var delay = "duration-300 ease-in-out";
+
+      x.className === before + delay
+        ? (x.className = "fixed translate-x-[-100%] w-full " + delay)
+        : (x.className = before + delay);
     }
-  }
+
+    // open close log preview
+    function logPreview() {
+      var x = document.getElementById("logPreview");
+      var before =
+        "fixed bottom-0 z-40 hidden h-[50vh] w-full overflow-auto bg-[#F9F9F9]";
+
+      x.className === before
+        ? x.classList.remove("hidden")
+        : (x.className = before);
+    }
+
+    return {
+      Nav,
+      logPreview,
+    };
+  })();
 
   async function cleanupAudioResources() {
     if (micProcessor) {
@@ -214,9 +237,6 @@
         <p class="text-sm">${new Date().toString().split(" GMT")[0]}</p>
       </div>
     </div>
-    <p>
-      <span class="font-semibold" id="final"></span>
-    </p>
     `;
 
     async function initWebSocket() {
@@ -238,7 +258,14 @@
               finalDiv.scrollTop = finalDiv.scrollHeight;
             } else {
               const interimDiv = document.getElementById("interim");
-              interimDiv.innerHTML += `${transcriptChar} <br /> <hr class="my-1" />`;
+              interimDiv.innerHTML += `
+              <p class="space-y-2">
+                <span class="font-semibold">${transcriptChar}</span> 
+                <br /> 
+                <span class="text-xs font-gray-500">${new Date().toString().split(" GMT")[0]}</span>
+              </p> 
+              </br />
+              `;
               interimDiv.scrollTop = interimDiv.scrollHeight;
             }
           }
@@ -306,6 +333,7 @@
       await initWebSocket();
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.close();
+        ws = null;
       }
 
       // button
