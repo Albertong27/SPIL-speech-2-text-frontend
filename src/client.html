@@ -27,10 +27,10 @@
   <body class="font-poppins">
     <!-- log preview -->
     <section
-      class="fixed bottom-0 z-40 hidden h-[50vh] w-full overflow-auto bg-[#F9F9F9]"
+      class="fixed z-40 hidden h-screen w-[25%] overflow-auto rounded-r-3xl border-r-2 border-gray-100 bg-white"
       id="logPreview"
     >
-      <p class="mx-auto w-[500px] py-8 text-center" id="interim"></p>
+      <p class="mx-auto w-[85%] py-8" id="interim"></p>
     </section>
 
     <section class="flex justify-center">
@@ -87,13 +87,19 @@
           class="navbar sticky top-8 z-30 flex gap-2 rounded-3xl bg-base-100 p-4 shadow-lg"
         >
           <!-- hamburger menu -->
-          <div class="navbar-start">
-            <button class="btn btn-square rounded-xl" onclick="openClose.Nav()">
-              <i class="fa-solid fa-bars" style="color: #000000"></i>
+          <div class="flex-1">
+            <button
+              class="btn btn-square z-50 flex-none rounded-xl"
+              onclick="openClose.logPreview()"
+            >
+              <i class="fa-solid fa-clock-rotate-left"></i>
             </button>
+            <!-- <button class="btn btn-square rounded-xl" onclick="openClose.Nav()">
+              <i class="fa-solid fa-bars" style="color: #000000"></i>
+            </button> -->
           </div>
 
-          <div class="navbar-center">
+          <div class="flex-none">
             <!-- start record -->
             <button
               class="btn btn-primary flex-none rounded-2xl"
@@ -128,14 +134,7 @@
             </button>
           </div>
 
-          <div class="navbar-end">
-            <button
-              class="btn btn-square btn-neutral z-50 flex-none rounded-xl"
-              onclick="openClose.logPreview()"
-            >
-              <i class="fa-solid fa-clock-rotate-left"></i>
-            </button>
-          </div>
+          <!-- <div class="navbar-end"></div> -->
         </nav>
 
         <!-- transcription result -->
@@ -192,7 +191,7 @@
     function logPreview() {
       var x = document.getElementById("logPreview");
       var before =
-        "fixed bottom-0 z-40 hidden h-[50vh] w-full overflow-auto bg-[#F9F9F9]";
+        "fixed z-40 hidden h-screen w-[25%] overflow-auto rounded-r-3xl border-r-2 border-gray-100 bg-white";
 
       x.className === before
         ? x.classList.remove("hidden")
