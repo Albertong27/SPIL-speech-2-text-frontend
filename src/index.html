@@ -26,6 +26,7 @@
 
   <body class="font-poppins">
     <section class="flex">
+      <!-- left side -->
       <div
         class="flex h-screen w-2/5 flex-col rounded-r-3xl border-2 border-gray-200"
       >
@@ -63,7 +64,7 @@
               <button
                 class="btn btn-primary w-fit flex-none rounded-2xl"
                 id="startListening"
-                onclick="startStopAudio('start')"
+                onclick="startAndStopListening('start')"
               >
                 <i
                   class="fa-solid fa-microphone fa-sm"
@@ -87,7 +88,7 @@
                 <button
                   class="btn btn-info hidden rounded-2xl !text-white"
                   id="pauseListening"
-                  onclick="startStopAudio('pause')"
+                  onclick="startAndStopListening('pause')"
                 >
                   <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
                   Pause Listening
@@ -104,7 +105,9 @@
         </div>
       </div>
 
+      <!-- right side -->
       <div class="w-3/5">
+        <!-- time picker -->
         <form
           class="flex h-[15vh] flex-col items-center justify-center gap-4 px-8"
         >
@@ -133,16 +136,17 @@
           </div>
         </form>
 
-        <div class="flex h-[75vh] w-full px-8">
+        <!-- text area -->
+        <div class="flex h-[77.5vh] w-full px-8">
           <div
-            class="h-[75vh] w-full rounded-l-xl border-2 border-gray-200 p-6"
+            class="h-[77.5vh] w-full rounded-l-xl border-2 border-gray-200 p-6"
           >
             <p class="text-sm text-gray-400">
               Transcription preview with selected time will appear here
             </p>
           </div>
           <div
-            class="h-[75vh] w-full rounded-r-xl border-2 border-l-0 border-gray-200 p-6"
+            class="h-[77.5vh] w-full rounded-r-xl border-2 border-l-0 border-gray-200 p-6"
           >
             <p class="text-sm text-gray-400">
               Transcription summary with selected time will appear here
@@ -150,8 +154,11 @@
           </div>
         </div>
 
-        <div class="flex h-[10vh] items-center px-8">
-          <p>© PT SPIL 2025</p>
+        <!-- copyright -->
+        <div class="flex h-[7.5vh] items-center px-8">
+          <p class="w-full text-center text-sm text-gray-700">
+            © PT SPIL 2025
+          </p>
         </div>
       </div>
 
@@ -163,7 +170,7 @@
             <form method="dialog" class="space-x-1">
               <button
                 class="btn btn-outline btn-error rounded-2xl hover:!text-white"
-                onclick="startStopAudio('stop')"
+                onclick="startAndStopListening('stop')"
               >
                 Yes
               </button>
@@ -172,6 +179,9 @@
           </div>
         </div>
       </dialog>
+
+      <!-- alert -->
+      <div id="alert"></div>
     </section>
   </body>
 </html>
@@ -182,6 +192,7 @@
   let audioContext = null;
   let micProcessor = null;
 
+  // clear audio
   async function cleanupAudioResources() {
     if (micProcessor) {
       micProcessor.disconnect();
@@ -197,53 +208,108 @@
     }
   }
 
-  async function startStopAudio(command) {
-    // start and stop button interface
+  // start and stop listening
+  async function startAndStopListening(command) {
     const startListening = document.getElementById("startListening");
     const stopListening = document.getElementById("stopListening");
     const pauseListening = document.getElementById("pauseListening");
 
+    // reset websocket
+    async function resetWebSocket() {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+      ws = null;
+    }
+
+    // handle stop button ui
+    async function handleStop() {
+      startListening.classList.remove("hidden");
+      startListening.innerHTML = `
+      <i class="fa-solid fa-microphone fa-sm" style="color: #ffffff"></i> Start
+      Listening with AWS
+      `;
+      stopListening.classList.add("hidden");
+      pauseListening.classList.add("hidden");
+    }
+
+    // display date and time badge
     document.getElementById("getDate").innerHTML =
       `<div class="badge badge-ghost">${new Date().toString().split(" GMT")[0]}</div>`;
 
+    // initiate websocket
     async function initWebSocket() {
       if (!ws) {
         ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
 
-        // live transcript
         let lastTranscript = "";
 
         ws.onmessage = (event) => {
           const transcriptChar = event.data;
 
-          if (transcriptChar !== lastTranscript) {
-            lastTranscript = transcriptChar.toLowerCase();
-            console.log(lastTranscript);
-            if (transcriptChar.slice(0, 6) === "final:") {
-              const finalDiv = document.getElementById("final");
-              finalDiv.innerHTML += `
-                <p>
-                    <span class="font-semibold">${transcriptChar.slice(6)}</span>
-                    <br /> 
-                    <span class="text-xs text-gray-500">${new Date().toString().split(" GMT")[0]}</span>
-                </p>
-                <br />`;
-              finalDiv.scrollTop = finalDiv.scrollHeight;
-            } else {
-              const interimDiv = document.getElementById("interim");
-              interimDiv.innerHTML = `${transcriptChar} `;
-              interimDiv.scrollTop = interimDiv.scrollHeight;
-            }
+          lastTranscript = transcriptChar;
+          console.log(lastTranscript);
+          console.log(transcriptChar);
+          if (transcriptChar.slice(0, 14) === "transcription:") {
+            const finalDiv = document.getElementById("final");
+            finalDiv.innerHTML += `
+            <p>
+              <span class="font-semibold">${transcriptChar.slice(14)}</span>
+              <br />
+              <span class="text-xs text-gray-500"
+                >${new Date().toString().split(" GMT")[0]}</span
+              >
+            </p>
+            <br />
+            `;
+            finalDiv.scrollTop = finalDiv.scrollHeight;
+          } else {
+            const interimDiv = document.getElementById("interim");
+            interimDiv.innerHTML = `${transcriptChar} `;
+            interimDiv.scrollTop = interimDiv.scrollHeight;
           }
         };
       }
 
-      ws.onclose = () => {
-        console.log("Websocket closed");
+      alertDiv = document.getElementById("alert");
+
+      ws.onerror = async () => {
+        alertDiv.innerHTML = `
+        <div class="toast toast-center toast-top">
+          <div class="alert alert-error flex gap-2 fill-white text-white">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span
+              >The WebSocket connection is error. Please contact administrator.</span
+            >
+          </div>
+        </div>
+        `;
+
+        setTimeout(() => {
+          alertDiv.innerHTML = "";
+        }, 5000);
+
+        await resetWebSocket();
+        await handleStop();
       };
 
-      ws.onerror = () => {
-        console.log("Websocket error");
+      ws.onclose = async () => {
+        alertDiv.innerHTML = `
+        <div class="toast toast-center toast-top">
+          <div class="alert alert-warning flex gap-2 fill-black text-black">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span
+              >The WebSocket connection was automatically closed. Please start
+              again.</span
+            >
+          </div>
+        </div>
+        `;
+
+        setTimeout(() => {
+          alertDiv.innerHTML = "";
+        }, 5000);
+
+        await resetWebSocket();
+        await handleStop();
       };
     }
 
@@ -256,7 +322,6 @@
     }
 
     if (command === "start") {
-      // button action
       startListening.classList.add("hidden");
       stopListening.classList.remove("btn-disabled", "hidden");
       pauseListening.classList.remove("hidden", "btn-disabled");
@@ -264,8 +329,8 @@
       // start websocket and activate microphone
       try {
         await cleanupAudioResources();
+        await resetWebSocket();
         await initWebSocket();
-
         await initAudio();
         micStream = await navigator.mediaDevices.getUserMedia({
           audio: true,
@@ -296,42 +361,22 @@
     // stop microphone
     else if (command === "stop") {
       await cleanupAudioResources();
-      await initWebSocket();
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.close();
-        ws = null;
-      }
-
-      // button
-      startListening.classList.remove("hidden");
-      startListening.innerHTML = `
-      <i
-        class="fa-solid fa-microphone fa-sm"
-        style="color: #ffffff"
-      ></i>
-      Start Listening with AWS
-    `;
-      stopListening.classList.add("hidden");
-      pauseListening.classList.add("hidden");
+      await resetWebSocket();
+      await handleStop();
     }
 
     // pause microphone
     else if (command === "pause") {
-      // microphone
       if (micStream) {
         micStream.getTracks().forEach((track) => track.stop());
         micStream = null;
       }
 
-      // button
       startListening.classList.remove("hidden");
       startListening.innerHTML = `
-      <i
-        class="fa-solid fa-play fa-sm"
-        style="color: #ffffff"
-      ></i>
+      <i class="fa-solid fa-play fa-sm" style="color: #ffffff"></i>
       Continue Listening with AWS
-    `;
+      `;
       stopListening.classList.add("hidden");
       pauseListening.classList.add("hidden");
     }
