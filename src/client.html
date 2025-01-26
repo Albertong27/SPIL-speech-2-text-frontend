@@ -25,124 +25,131 @@
   </head>
 
   <body class="font-poppins">
-    <!-- log preview -->
-    <section
-      class="fixed z-40 hidden h-screen w-[25%] overflow-auto rounded-r-3xl border-r-2 border-gray-100 bg-white"
-      id="logPreview"
-    >
-      <p class="mx-auto w-[85%] py-8" id="interim"></p>
-    </section>
-
-    <section class="flex justify-center">
-      <!-- left -->
-      <div class="relative min-w-[25%] duration-300 ease-in-out" id="myTopnav">
-        <div class="fixed min-w-[25%]">
-          <div class="mx-auto flex h-screen max-w-[85%] flex-col gap-12 pt-8">
-            <!-- logo -->
-            <img
-              src="https://www.spil.co.id/img/spil_logo.581f4306.svg"
-              width="50"
-            />
-
-            <!-- live transcript menu -->
-            <div class="space-y-4">
-              <ul class="menu w-full rounded-box bg-base-200">
-                <li>
-                  <h2 class="menu-title">Live Transcript</h2>
-                  <ul>
-                    <li>
-                      <button class="active">Amazon Web Service (AWS)</button>
-                    </li>
-                    <li><button>Vertex AI</button></li>
-                  </ul>
-                </li>
-              </ul>
-
-              <!-- recorded transcript menu -->
-              <ul class="menu w-full rounded-box bg-base-200">
-                <li>
-                  <h2 class="menu-title">Recorded Transcript</h2>
-                  <ul>
-                    <li><button>URL</button></li>
-                    <li><button>Audio File</button></li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
-
-            <!-- copyright -->
-            <p
-              class="absolute bottom-8 left-1/2 -translate-x-1/2 transform text-sm"
+    <section class="flex">
+      <!-- left side -->
+      <div
+        class="flex h-screen w-[32.5%] flex-col rounded-r-xl border-r-2 border-gray-300"
+      >
+        <div class="w-full">
+          <!-- search bar -->
+          <div class="h-[15vh]">
+            <div
+              class="z-50 flex h-[15vh] w-full items-center justify-center rounded-tr-xl px-10"
             >
-              © 2025 PT SPIL
-            </p>
+              <label
+                class="input input-bordered flex w-full items-center gap-2 rounded-lg"
+              >
+                <input type="text" class="grow" placeholder="Search" />
+                <i class="fas fa-search fa-sm" style="color: #697079"></i>
+              </label>
+            </div>
+          </div>
+
+          <!-- transcription result -->
+          <div class="h-[70vh] !overflow-auto" id="transcription">
+            <div class="relative flex h-full flex-col justify-end">
+              <div class="space-y-6 overflow-auto px-10">
+                <div id="getDate"></div>
+                <p>
+                  <span class="font-semibold" id="final"></span>
+                  <span class="text-gray-300" id="interim"></span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="fixed bottom-0 h-[15vh] w-[32.5%] rounded-br-xl">
+            <div class="flex h-[15vh] items-center justify-between px-10">
+              <!-- start record -->
+              <button
+                class="btn btn-primary w-fit flex-none rounded-lg"
+                id="startListening"
+                onclick="startAndStopListening('start')"
+              >
+                <i
+                  class="fa-solid fa-microphone fa-sm"
+                  style="color: #ffffff"
+                ></i>
+                Start Listening with AWS
+              </button>
+
+              <div class="flex gap-2">
+                <!-- stop record -->
+                <button
+                  class="btn btn-disabled btn-error hidden rounded-lg !text-white"
+                  id="stopListening"
+                  onclick="my_modal_1.showModal()"
+                >
+                  <i class="fa-solid fa-stop fa-sm" style="color: #ffffff"></i>
+                  Stop Listening
+                </button>
+
+                <!-- pause record -->
+                <button
+                  class="btn btn-info hidden rounded-lg !text-white"
+                  id="pauseListening"
+                  onclick="startAndStopListening('pause')"
+                >
+                  <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
+                  Pause Listening
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- right -->
-      <div class="mx-auto flex w-full flex-col gap-10 p-8">
-        <!-- navbar -->
-        <nav
-          class="navbar sticky top-8 z-30 flex gap-2 rounded-3xl bg-base-100 p-4 shadow-lg"
-        >
-          <!-- hamburger menu -->
-          <div class="flex-1">
+      <!-- right side -->
+      <div class="mx-auto flex w-[67.5%]" id="rideSide">
+        <!-- time picker -->
+        <div class="w-full">
+          <form class="flex gap-4 p-6 pb-4" id="formheight">
+            <select class="select select-bordered w-4/12 rounded-lg" required>
+              <option disabled selected>Choose meeting topic</option>
+              <option>Han Solo</option>
+              <option>Greedo</option>
+            </select>
+            <div class="flex w-5/12 gap-2">
+              <input
+                type="time"
+                id="time_1"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                required
+              />
+              <input
+                type="time"
+                id="time_2"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                required
+              />
+            </div>
             <button
-              class="btn btn-square z-50 flex-none rounded-xl"
-              onclick="openClose.logPreview()"
-            >
-              <i class="fa-solid fa-clock-rotate-left"></i>
-            </button>
-            <!-- <button class="btn btn-square rounded-xl" onclick="openClose.Nav()">
-              <i class="fa-solid fa-bars" style="color: #000000"></i>
-            </button> -->
-          </div>
-
-          <div class="flex-none">
-            <!-- start record -->
-            <button
-              class="btn btn-primary flex-none rounded-2xl"
-              id="startListening"
-              onclick="startStopAudio('start')"
+              class="btn btn-outline btn-primary h-full w-3/12 rounded-lg"
+              type="submit"
             >
               <i
-                class="fa-solid fa-microphone fa-sm"
-                style="color: #ffffff"
+                class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
               ></i>
-              Start Listening with AWS
+              Summarize with AI
             </button>
+          </form>
 
-            <!-- stop record -->
-            <button
-              class="btn btn-disabled btn-error mr-2 hidden rounded-2xl !text-white"
-              id="stopListening"
-              onclick="my_modal_1.showModal()"
+          <!-- preview area -->
+          <div class="flex">
+            <div
+              class="ml-6 h-[calc(100vh-88px-24px)] w-5/12 rounded-l-xl border-2 border-gray-300 p-6"
             >
-              <i class="fa-solid fa-stop fa-sm" style="color: #ffffff"></i>
-              Stop Listening
-            </button>
-
-            <!-- pause record -->
-            <button
-              class="btn btn-info hidden rounded-xl !text-white"
-              id="pauseListening"
-              onclick="startStopAudio('pause')"
+              <p class="text-gray-400">
+                Transcription preview with selected time will appear here
+              </p>
+            </div>
+            <!-- summary area -->
+            <div
+              class="mr-6 h-[calc(100vh-88px-24px)] w-7/12 rounded-r-xl border-2 border-l-0 border-gray-300 p-6"
             >
-              <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
-              Pause Listening
-            </button>
-          </div>
-
-          <!-- <div class="navbar-end"></div> -->
-        </nav>
-
-        <!-- transcription result -->
-        <div class="mx-auto flex w-[500px] gap-8" id="transcription">
-          <div class="flex w-full gap-4">
-            <div class="space-y-6 text-justify">
-              <div id="getDate"></div>
-              <p><span class="font-semibold" id="final"></span></p>
+              <p class="text-gray-400">
+                Transcription summary with selected time will appear here
+              </p>
             </div>
           </div>
         </div>
@@ -155,17 +162,32 @@
           <div class="modal-action">
             <form method="dialog" class="space-x-1">
               <button
-                class="btn btn-outline btn-error rounded-2xl hover:!text-white"
-                onclick="startStopAudio('stop')"
+                class="btn btn-outline btn-error rounded-lg hover:!text-white"
+                onclick="startAndStopListening('stop')"
               >
                 Yes
               </button>
-              <button class="btn rounded-xl">Close</button>
+              <button class="btn rounded-lg">Close</button>
             </form>
           </div>
         </div>
       </dialog>
     </section>
+
+    <!-- alert -->
+    <div class="hidden" id="alert">
+      <div class="hidden" id="onerror">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span
+          >The WebSocket connection is error. Please contact
+          administrator.</span
+        >
+      </div>
+      <div class="hidden" id="onclose">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>The WebSocket connection is closed. Please start again.</span>
+      </div>
+    </div>
   </body>
 </html>
 
@@ -174,36 +196,9 @@
   let micStream = null;
   let audioContext = null;
   let micProcessor = null;
+  let isAlreadyStart = false;
 
-  const openClose = (function () {
-    // open close navbar
-    function Nav() {
-      var x = document.getElementById("myTopnav");
-      var before = "relative min-w-[25%] ";
-      var delay = "duration-300 ease-in-out";
-
-      x.className === before + delay
-        ? (x.className = "fixed translate-x-[-100%] w-full " + delay)
-        : (x.className = before + delay);
-    }
-
-    // open close log preview
-    function logPreview() {
-      var x = document.getElementById("logPreview");
-      var before =
-        "fixed z-40 hidden h-screen w-[25%] overflow-auto rounded-r-3xl border-r-2 border-gray-100 bg-white";
-
-      x.className === before
-        ? x.classList.remove("hidden")
-        : (x.className = before);
-    }
-
-    return {
-      Nav,
-      logPreview,
-    };
-  })();
-
+  // clear audio
   async function cleanupAudioResources() {
     if (micProcessor) {
       micProcessor.disconnect();
@@ -219,64 +214,98 @@
     }
   }
 
-  async function startStopAudio(command) {
-    // start and stop button interface
+  // start and stop listening
+  async function startAndStopListening(command) {
     const startListening = document.getElementById("startListening");
     const stopListening = document.getElementById("stopListening");
     const pauseListening = document.getElementById("pauseListening");
 
-    document.getElementById("getDate").innerHTML = `
-    <div class="space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="avatar placeholder h-fit w-fit">
-          <div class="w-10 rounded-full bg-neutral text-neutral-content">
-            <i class="fa-solid fa-calendar fa-sm" style="color: #ffffff"></i>
-          </div>
-        </div>
-        <p class="text-sm">${new Date().toString().split(" GMT")[0]}</p>
-      </div>
-    </div>
-    `;
+    // reset websocket
+    async function resetWebSocket() {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+      ws = null;
+    }
 
+    // handle stop button ui
+    async function handleStop() {
+      startListening.classList.remove("hidden");
+      startListening.innerHTML = `
+      <i class="fa-solid fa-microphone fa-sm" style="color: #ffffff"></i> Start
+      Listening with AWS
+      `;
+      stopListening.classList.add("hidden");
+      pauseListening.classList.add("hidden");
+    }
+
+    // display date and time badge
+    let getDateDiv = document.getElementById("getDate");
+    getDateDiv.innerHTML = `<div class="badge badge-ghost">${new Date().toString().split(" GMT")[0]}</div>`;
+
+    // initiate websocket
     async function initWebSocket() {
       if (!ws) {
         ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
 
-        // live transcript
-        let lastTranscript = "";
-
         ws.onmessage = (event) => {
-          const transcriptChar = event.data;
+          const interimDiv = document.getElementById("interim");
+          const finalDiv = document.getElementById("final");
+          const transcriptionDiv = document.getElementById("transcription");
 
-          if (transcriptChar !== lastTranscript) {
-            lastTranscript = transcriptChar.toLowerCase();
-            console.log(lastTranscript);
-            if (transcriptChar.slice(0, 6) === "final:") {
-              const finalDiv = document.getElementById("final");
-              finalDiv.innerHTML += transcriptChar.slice(6);
-              finalDiv.scrollTop = finalDiv.scrollHeight;
-            } else {
-              const interimDiv = document.getElementById("interim");
-              interimDiv.innerHTML += `
-              <p class="space-y-2">
-                <span class="font-semibold">${transcriptChar}</span> 
-                <br /> 
-                <span class="text-xs font-gray-500">${new Date().toString().split(" GMT")[0]}</span>
-              </p> 
-              </br />
-              `;
-              interimDiv.scrollTop = interimDiv.scrollHeight;
-            }
+          if (event.data === "listening") {
+            interimDiv.innerHTML = `<span class="loading loading-dots loading-md text-gray-500"></span>`;
+            transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
+          } else {
+            const transcriptChar = JSON.parse(event.data);
+            finalDiv.innerHTML += `
+            <p>
+              <span class="font-semibold">${transcriptChar.transcription}</span>
+              <br />
+              <span class="text-xs text-gray-500"
+                >${new Date().toString().split(" GMT")[0]}</span
+              >
+            </p>
+            <br />
+            `;
+            transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
+            interimDiv.innerHTML = "";
           }
         };
       }
 
-      ws.onclose = () => {
-        console.log("Websocket closed");
+      onAlertDiv = document.getElementById("alert");
+      onErrorDiv = document.getElementById("onerror");
+      onCloseDiv = document.getElementById("onclose");
+
+      ws.onerror = async () => {
+        onAlertDiv.className = "toast";
+        onErrorDiv.className =
+          "alert alert-error flex gap-2 fill-white text-white rounded-lg text-sm";
+        // getDateDiv.innerHTML = "";
+
+        setTimeout(() => {
+          onErrorDiv.className = "hidden";
+          onAlertDiv.className = "hidden";
+        }, 5000);
+
+        await cleanupAudioResources();
+        await handleStop();
+        await resetWebSocket();
       };
 
-      ws.onerror = () => {
-        console.log("Websocket error");
+      ws.onclose = async () => {
+        onAlertDiv.className = "toast";
+        onCloseDiv.className =
+          "alert alert-warning flex gap-2 fill-black text-black rounded-lg text-sm";
+        // getDateDiv.innerHTML = "";
+
+        setTimeout(() => {
+          onCloseDiv.className = "hidden";
+          onAlertDiv.className = "hidden";
+        }, 5000);
+
+        await cleanupAudioResources();
+        await handleStop();
+        await resetWebSocket();
       };
     }
 
@@ -289,24 +318,24 @@
     }
 
     if (command === "start") {
-      // button action
       startListening.classList.add("hidden");
       stopListening.classList.remove("btn-disabled", "hidden");
       pauseListening.classList.remove("hidden", "btn-disabled");
 
       // start websocket and activate microphone
       try {
+        if (isAlreadyStart === false) {
+          await resetWebSocket();
+          await initWebSocket();
+        }
         await cleanupAudioResources();
-        await initWebSocket();
-
         await initAudio();
+
         micStream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
-
         const source = audioContext.createMediaStreamSource(micStream);
         micProcessor = audioContext.createScriptProcessor(4096, 1, 1);
-
         source.connect(micProcessor);
         micProcessor.connect(audioContext.destination);
 
@@ -328,43 +357,24 @@
 
     // stop microphone
     else if (command === "stop") {
+      isAlreadyStart = false;
       await cleanupAudioResources();
-      await initWebSocket();
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.close();
-        ws = null;
-      }
-
-      // button
-      startListening.classList.remove("hidden");
-      startListening.innerHTML = `
-      <i
-        class="fa-solid fa-microphone fa-sm"
-        style="color: #ffffff"
-      ></i>
-      Start Listening with AWS
-    `;
-      stopListening.classList.add("hidden");
-      pauseListening.classList.add("hidden");
+      await resetWebSocket();
+      await handleStop();
     }
 
     // pause microphone
     else if (command === "pause") {
-      // microphone
+      isAlreadyStart = true;
       if (micStream) {
         micStream.getTracks().forEach((track) => track.stop());
         micStream = null;
       }
-
-      // button
       startListening.classList.remove("hidden");
       startListening.innerHTML = `
-      <i
-        class="fa-solid fa-play fa-sm"
-        style="color: #ffffff"
-      ></i>
+      <i class="fa-solid fa-play fa-sm" style="color: #ffffff"></i>
       Continue Listening with AWS
-    `;
+      `;
       stopListening.classList.add("hidden");
       pauseListening.classList.add("hidden");
     }
