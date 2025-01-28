@@ -28,7 +28,7 @@
     <section class="flex">
       <!-- left side -->
       <div
-        class="flex h-screen w-[32.5%] flex-col rounded-r-xl border-r-2 border-gray-300"
+        class="flex h-screen w-[35%] flex-col rounded-r-xl border-r-2 border-gray-300"
       >
         <div class="w-full">
           <!-- search bar -->
@@ -46,9 +46,9 @@
           </div>
 
           <!-- transcription result -->
-          <div class="h-[70vh] !overflow-auto" id="transcription">
+          <div class="h-[70vh] !overflow-auto">
             <div class="relative flex h-full flex-col justify-end">
-              <div class="space-y-6 overflow-auto px-10">
+              <div class="space-y-6 overflow-auto px-10" id="transcription">
                 <div id="getDate"></div>
                 <p>
                   <span class="font-semibold" id="final"></span>
@@ -58,7 +58,7 @@
             </div>
           </div>
 
-          <div class="fixed bottom-0 h-[15vh] w-[32.5%] rounded-br-xl">
+          <div class="fixed bottom-0 h-[15vh] w-[35%] rounded-br-xl">
             <div class="flex h-[15vh] items-center justify-between px-10">
               <!-- start record -->
               <button
@@ -70,7 +70,7 @@
                   class="fa-solid fa-microphone fa-sm"
                   style="color: #ffffff"
                 ></i>
-                Start Listening with AWS
+                Start Listening
               </button>
 
               <div class="flex gap-2">
@@ -81,7 +81,7 @@
                   onclick="my_modal_1.showModal()"
                 >
                   <i class="fa-solid fa-stop fa-sm" style="color: #ffffff"></i>
-                  Stop Listening
+                  Stop
                 </button>
 
                 <!-- pause record -->
@@ -91,41 +91,44 @@
                   onclick="startAndStopListening('pause')"
                 >
                   <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
-                  Pause Listening
+                  Pause
                 </button>
               </div>
+              <button
+                class="btn btn-circle btn-outline btn-sm"
+                onclick="scrollToBottom()"
+              >
+                <i class="fa-solid fa-angles-down"></i>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- right side -->
-      <div class="mx-auto flex w-[67.5%]" id="rideSide">
+      <div class="mx-auto flex w-[65%]" id="rideSide">
         <!-- time picker -->
         <div class="w-full">
-          <form class="flex gap-4 p-6 pb-4" id="formheight">
-            <select class="select select-bordered w-4/12 rounded-lg" required>
-              <option disabled selected>Choose meeting topic</option>
-              <option>Han Solo</option>
-              <option>Greedo</option>
-            </select>
-            <div class="flex w-5/12 gap-2">
+          <form class="flex justify-between p-6 pb-4" id="formheight">
+            <div class="flex gap-2">
               <input
                 type="time"
                 id="time_1"
-                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 required
               />
               <input
                 type="time"
                 id="time_2"
-                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 required
               />
             </div>
             <button
-              class="btn btn-outline btn-primary h-full w-3/12 rounded-lg"
-              type="submit"
+              class="btn btn-outline btn-primary h-full w-fit min-w-[188px] rounded-lg"
+              type="button"
+              onclick="summarize('/api/sac/summarize')"
+              id="summarizeButton"
             >
               <i
                 class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
@@ -137,17 +140,17 @@
           <!-- preview area -->
           <div class="flex">
             <div
-              class="ml-6 h-[calc(100vh-88px-24px)] w-5/12 rounded-l-xl border-2 border-gray-300 p-6"
+              class="ml-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-l-xl border-2 border-gray-300 p-6"
             >
-              <p class="text-gray-400">
-                Transcription preview with selected time will appear here
+              <p class="text-gray-400" id="preview">
+                Transcription summary with selected time will appear here
               </p>
             </div>
             <!-- summary area -->
             <div
-              class="mr-6 h-[calc(100vh-88px-24px)] w-7/12 rounded-r-xl border-2 border-l-0 border-gray-300 p-6"
+              class="mr-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-r-xl border-2 border-l-0 border-gray-300 p-6"
             >
-              <p class="text-gray-400">
+              <p class="text-gray-400" id="summary">
                 Transcription summary with selected time will appear here
               </p>
             </div>
@@ -157,17 +160,17 @@
 
       <!-- stop listening modal -->
       <dialog id="my_modal_1" class="modal">
-        <div class="modal-box">
+        <div class="modal-box rounded-lg">
           <p class="py-4">Are you sure you want to "Stop Listening"?</p>
           <div class="modal-action">
             <form method="dialog" class="space-x-1">
               <button
-                class="btn btn-outline btn-error rounded-lg hover:!text-white"
+                class="btn btn-outline btn-error btn-sm rounded-lg hover:!text-white"
                 onclick="startAndStopListening('stop')"
               >
                 Yes
               </button>
-              <button class="btn rounded-lg">Close</button>
+              <button class="btn btn-outline btn-sm rounded-lg">Cancel</button>
             </form>
           </div>
         </div>
@@ -197,6 +200,51 @@
   let audioContext = null;
   let micProcessor = null;
   let isAlreadyStart = false;
+
+  // scroll to bottom
+  let transcriptionDiv = document.getElementById("transcription");
+
+  function scrollToBottom() {
+    transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
+  }
+
+  // summarizer
+  async function summarize(slug) {
+    const loadingDiv = `<span class="loading loading-spinner loading-md"></span>`;
+    const previewDiv = document.getElementById("preview");
+    const summaryDiv = document.getElementById("summary");
+    const summarizeButtonDiv = document.getElementById("summarizeButton");
+    previewDiv.innerHTML = loadingDiv;
+    summaryDiv.innerHTML = loadingDiv;
+    summarizeButtonDiv.classList.add("btn-disabled");
+    summarizeButtonDiv.innerHTML = `<span class="loading loading-spinner"></span>`;
+    const text =
+      "Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Tidur telat, bangun pagi-pagi Nyalain komputer, online lagi Bukan mau ngetik kerjaan E-mail tugas diserahkan Tapi malah buka Facebook Padahal face masih ngantuk Beler kayak orang mabuk Pala naik-turun, ngangguk-ngangguk Sambil nge-download mp3 Colok iPod USB kiri Ngecekin postingan forum Apa ada balesannya, belum Biar belum sikat gigi, belum mandi Tapi kalo belum online paling anti Liat Friendster, Myspace, YouTube Me and him, everybody, you too Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Jari dan keyboard beradu Pasang earphone, dengar lagu Aku online, online Online, online Nah, udah mandi, siap berangkat Langsung cabut, takut terlambat Tak lupa flash disk gantung di leher Malah lupa sepatu, jadi nyeker Flashdisk isinya bokep atau lagu Kalau ada kerjaan pun gue ragu Kalo emang berani, coba pada ngaku Cek isi foldernya satu-satu Di kantor, online pakai proksi Walau diblok server, bisa dilolosi Namanya udah ketagihan internet Produktivitas pun kepepet Jam kerja malah chatting YM Ngobrol online sama eh-he-hem Atasan lewat, langsung klik data Pura-pura kerja di depan mata Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Jari dan keyboard beradu Pasang earphone, dengar lagu Aku online, online Online, online Makan siang pun aku cari sinyal Wi-Fi Mengapa ku kecanduan? Oh, why, why? Kadang terasa bagai tak berdaya Ingin ku berubah Cek e-mail, spam semua E-mail benerannya cuma dua Yang satu, email lama Yang satu, forward-an yang sama Ngarep komentar, buka Friendster Loading, gue tinggal beser Pas balik, ngecek komputer Kok lagi maintenance server Ya udah, download lagu Bajakan gratis, gak pake ragu Saykoji satu album Setengah jam bisa rampung Sore-sore bosen hambar Ide nakal, cari-cari gambar Download video dengan sabar Ketahuan pacar, digampar Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Jari dan keyboard beradu Pasang earphone, dengar lagu Aku online, online Online, online Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Jari dan keyboard beradu Pasang earphone, dengar lagu Aku online, online Online, online";
+
+    try {
+      var formData = new FormData();
+      formData.append("raw_input", text);
+      const response = await fetch(`http://192.168.1.50:19110${slug}`, {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      previewDiv.innerHTML = text;
+      summaryDiv.innerHTML = JSON.stringify(result.result.response);
+      previewDiv.classList = "text-black";
+      summaryDiv.classList = "text-black";
+    } catch (e) {
+      console.error(e);
+    } finally {
+      summarizeButtonDiv.innerHTML = `
+      <i
+        class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
+      ></i>
+      Summarize with AI
+      `;
+      summarizeButtonDiv.classList.remove("btn-disabled");
+    }
+  }
 
   // clear audio
   async function cleanupAudioResources() {
@@ -231,7 +279,7 @@
       startListening.classList.remove("hidden");
       startListening.innerHTML = `
       <i class="fa-solid fa-microphone fa-sm" style="color: #ffffff"></i> Start
-      Listening with AWS
+      Listening
       `;
       stopListening.classList.add("hidden");
       pauseListening.classList.add("hidden");
@@ -249,11 +297,10 @@
         ws.onmessage = (event) => {
           const interimDiv = document.getElementById("interim");
           const finalDiv = document.getElementById("final");
-          const transcriptionDiv = document.getElementById("transcription");
 
           if (event.data === "listening") {
             interimDiv.innerHTML = `<span class="loading loading-dots loading-md text-gray-500"></span>`;
-            transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
+            // transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
           } else {
             const transcriptChar = JSON.parse(event.data);
             finalDiv.innerHTML += `
@@ -266,8 +313,8 @@
             </p>
             <br />
             `;
-            transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
             interimDiv.innerHTML = "";
+            // transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
           }
         };
       }
@@ -373,7 +420,7 @@
       startListening.classList.remove("hidden");
       startListening.innerHTML = `
       <i class="fa-solid fa-play fa-sm" style="color: #ffffff"></i>
-      Continue Listening with AWS
+      Continue Listening
       `;
       stopListening.classList.add("hidden");
       pauseListening.classList.add("hidden");
