@@ -109,7 +109,7 @@
       <div class="mx-auto flex w-[65%]" id="rideSide">
         <!-- time picker -->
         <div class="w-full">
-          <form class="flex justify-between p-6 pb-4" id="formheight">
+          <div class="flex justify-between p-6 pb-4" id="formheight">
             <div class="flex gap-2">
               <input
                 type="time"
@@ -126,8 +126,8 @@
             </div>
             <button
               class="btn btn-outline btn-primary h-full w-fit min-w-[188px] rounded-lg"
-              type="button"
-              onclick="summarize('/api/sac/summarize')"
+              type="submit"
+              onclick="summarize('/summarizer')"
               id="summarizeButton"
             >
               <i
@@ -135,7 +135,7 @@
               ></i>
               Summarize with AI
             </button>
-          </form>
+          </div>
 
           <!-- preview area -->
           <div class="flex">
@@ -209,7 +209,10 @@
   }
 
   // summarizer
-  async function summarize(slug) {
+  function summarize(slug) {
+    onAlertDiv = document.getElementById("alert");
+    onErrorDiv = document.getElementById("onerror");
+    onCloseDiv = document.getElementById("onclose");
     const loadingDiv = `<span class="loading loading-spinner loading-md"></span>`;
     const previewDiv = document.getElementById("preview");
     const summaryDiv = document.getElementById("summary");
@@ -217,25 +220,25 @@
     previewDiv.innerHTML = loadingDiv;
     summaryDiv.innerHTML = loadingDiv;
     summarizeButtonDiv.classList.add("btn-disabled");
-    summarizeButtonDiv.innerHTML = `<span class="loading loading-spinner"></span>`;
-    const text =
-      "Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Tidur telat, bangun pagi-pagi Nyalain komputer, online lagi Bukan mau ngetik kerjaan E-mail tugas diserahkan Tapi malah buka Facebook Padahal face masih ngantuk Beler kayak orang mabuk Pala naik-turun, ngangguk-ngangguk Sambil nge-download mp3 Colok iPod USB kiri Ngecekin postingan forum Apa ada balesannya, belum Biar belum sikat gigi, belum mandi Tapi kalo belum online paling anti Liat Friendster, Myspace, YouTube Me and him, everybody, you too Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Jari dan keyboard beradu Pasang earphone, dengar lagu Aku online, online Online, online Nah, udah mandi, siap berangkat Langsung cabut, takut terlambat Tak lupa flash disk gantung di leher Malah lupa sepatu, jadi nyeker Flashdisk isinya bokep atau lagu Kalau ada kerjaan pun gue ragu Kalo emang berani, coba pada ngaku Cek isi foldernya satu-satu Di kantor, online pakai proksi Walau diblok server, bisa dilolosi Namanya udah ketagihan internet Produktivitas pun kepepet Jam kerja malah chatting YM Ngobrol online sama eh-he-hem Atasan lewat, langsung klik data Pura-pura kerja di depan mata Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Jari dan keyboard beradu Pasang earphone, dengar lagu Aku online, online Online, online Makan siang pun aku cari sinyal Wi-Fi Mengapa ku kecanduan? Oh, why, why? Kadang terasa bagai tak berdaya Ingin ku berubah Cek e-mail, spam semua E-mail benerannya cuma dua Yang satu, email lama Yang satu, forward-an yang sama Ngarep komentar, buka Friendster Loading, gue tinggal beser Pas balik, ngecek komputer Kok lagi maintenance server Ya udah, download lagu Bajakan gratis, gak pake ragu Saykoji satu album Setengah jam bisa rampung Sore-sore bosen hambar Ide nakal, cari-cari gambar Download video dengan sabar Ketahuan pacar, digampar Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Jari dan keyboard beradu Pasang earphone, dengar lagu Aku online, online Online, online Siang-malam, ku selalu Menatap layar terpaku Untuk online, online Online, online Jari dan keyboard beradu Pasang earphone, dengar lagu Aku online, online Online, online";
+    summarizeButtonDiv.innerHTML = loadingDiv;
+    const socket = new WebSocket(`ws://localhost:8000${slug}`);
 
-    try {
-      var formData = new FormData();
-      formData.append("raw_input", text);
-      const response = await fetch(`http://192.168.1.50:19110${slug}`, {
-        method: "POST",
-        body: formData,
-      });
-      const result = await response.json();
-      previewDiv.innerHTML = text;
-      summaryDiv.innerHTML = JSON.stringify(result.result.response);
+    socket.onopen = function () {
+      console.log("Connected to WebSocket");
+
+      const requestData = {
+        start_datetime: `30-01-2025 ${document.getElementById('time_1').value}:00`,
+        end_datetime: `30-01-2025 ${document.getElementById('time_2').value}:00`,
+      };
+
+      socket.send(JSON.stringify(requestData));
+    };
+
+    socket.onmessage = function (event) {
+      previewDiv.textContent = event.data;
       previewDiv.classList = "text-black";
+      summaryDiv.textContent = event.data;
       summaryDiv.classList = "text-black";
-    } catch (e) {
-      console.error(e);
-    } finally {
       summarizeButtonDiv.innerHTML = `
       <i
         class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
@@ -243,7 +246,57 @@
       Summarize with AI
       `;
       summarizeButtonDiv.classList.remove("btn-disabled");
-    }
+    };
+
+    socket.onerror = function () {
+      onAlertDiv.className = "toast";
+      onErrorDiv.className =
+        "alert alert-error flex gap-2 fill-white text-white rounded-lg text-sm";
+      // getDateDiv.innerHTML = "";
+
+      setTimeout(() => {
+        onErrorDiv.className = "hidden";
+        onAlertDiv.className = "hidden";
+      }, 5000);
+
+      summarizeButtonDiv.innerHTML = `
+      <i
+        class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
+      ></i>
+      Summarize with AI
+      `;
+      summarizeButtonDiv.classList.remove("btn-disabled");
+      previewDiv.innerHTML = `
+      <p class="text-gray-400" id="preview">
+        Transcription summary with selected time will appear here
+      </p>
+      `;
+    };
+
+    socket.onclose = function () {
+      onAlertDiv.className = "toast";
+      onCloseDiv.className =
+        "alert alert-warning flex gap-2 fill-black text-black rounded-lg text-sm";
+      // getDateDiv.innerHTML = "";
+
+      setTimeout(() => {
+        onCloseDiv.className = "hidden";
+        onAlertDiv.className = "hidden";
+      }, 5000);
+
+      summarizeButtonDiv.innerHTML = `
+      <i
+        class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
+      ></i>
+      Summarize with AI
+      `;
+      summarizeButtonDiv.classList.remove("btn-disabled");
+      summaryDiv.innerHTML = `
+      <p class="text-gray-400" id="summary">
+        Transcription summary with selected time will appear here
+      </p>
+      `;
+    };
   }
 
   // clear audio
