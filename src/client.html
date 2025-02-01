@@ -195,242 +195,194 @@
 </html>
 
 <script>
-  let ws = null;
-  let micStream = null;
+  const finalDiv = document.getElementById("final");
+  const getDateDiv = document.getElementById("getDate");
+  const interimDiv = document.getElementById("interim");
+  const loadingDiv = `<span class="loading loading-spinner loading-md"></span>`;
+  const onAlertDiv = document.getElementById("alert");
+  const onCloseDiv = document.getElementById("onclose");
+  const onErrorDiv = document.getElementById("onerror");
+  const pauseListening = document.getElementById("pauseListening");
+  const previewDiv = document.getElementById("preview");
+  const startListening = document.getElementById("startListening");
+  const stopListening = document.getElementById("stopListening");
+  const summarizeButtonDiv = document.getElementById("summarizeButton");
+  const summaryDiv = document.getElementById("summary");
+  const transcriptionDiv = document.getElementById("transcription");
   let audioContext = null;
-  let micProcessor = null;
   let isAlreadyStart = false;
-
-  // scroll to bottom
-  let transcriptionDiv = document.getElementById("transcription");
+  let micProcessor = null;
+  let micStream = null;
+  let ws = null;
 
   function scrollToBottom() {
     transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
   }
 
-  // summarizer
-  function summarize(slug) {
-    onAlertDiv = document.getElementById("alert");
-    onErrorDiv = document.getElementById("onerror");
-    onCloseDiv = document.getElementById("onclose");
-    const loadingDiv = `<span class="loading loading-spinner loading-md"></span>`;
-    const previewDiv = document.getElementById("preview");
-    const summaryDiv = document.getElementById("summary");
-    const summarizeButtonDiv = document.getElementById("summarizeButton");
-    previewDiv.innerHTML = loadingDiv;
-    summaryDiv.innerHTML = loadingDiv;
-    summarizeButtonDiv.classList.add("btn-disabled");
-    summarizeButtonDiv.innerHTML = loadingDiv;
-    const socket = new WebSocket(`ws://localhost:8000${slug}`);
+  const handleWebSocketCloseOrError = async (
+    messageClass,
+    alertClass,
+    type,
+  ) => {
+    interimDiv.innerHTML = "";
+    onAlertDiv.className = "toast";
+    alertClass.className = `alert ${messageClass} flex gap-2 fill-white rounded-lg text-sm`;
 
-    socket.onopen = function () {
-      console.log("Connected to WebSocket");
+    setTimeout(() => {
+      alertClass.className = "hidden";
+      onAlertDiv.className = "hidden";
+    }, 5000);
 
-      const requestData = {
-        start_datetime: `30-01-2025 ${document.getElementById('time_1').value}:00`,
-        end_datetime: `30-01-2025 ${document.getElementById('time_2').value}:00`,
-      };
-
-      socket.send(JSON.stringify(requestData));
-    };
-
-    socket.onmessage = function (event) {
-      previewDiv.textContent = event.data;
-      previewDiv.classList = "text-black";
-      summaryDiv.textContent = event.data;
-      summaryDiv.classList = "text-black";
-      summarizeButtonDiv.innerHTML = `
-      <i
-        class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
-      ></i>
-      Summarize with AI
-      `;
-      summarizeButtonDiv.classList.remove("btn-disabled");
-    };
-
-    socket.onerror = function () {
-      onAlertDiv.className = "toast";
-      onErrorDiv.className =
-        "alert alert-error flex gap-2 fill-white text-white rounded-lg text-sm";
-      // getDateDiv.innerHTML = "";
-
-      setTimeout(() => {
-        onErrorDiv.className = "hidden";
-        onAlertDiv.className = "hidden";
-      }, 5000);
-
-      summarizeButtonDiv.innerHTML = `
-      <i
-        class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
-      ></i>
-      Summarize with AI
-      `;
-      summarizeButtonDiv.classList.remove("btn-disabled");
+    if (type === "listen") {
+      await cleanupAudioResources();
+      handleStop();
+      resetWebSocket();
+    } else if (type === "summary") {
       previewDiv.innerHTML = `
       <p class="text-gray-400" id="preview">
         Transcription summary with selected time will appear here
       </p>
       `;
-    };
-
-    socket.onclose = function () {
-      onAlertDiv.className = "toast";
-      onCloseDiv.className =
-        "alert alert-warning flex gap-2 fill-black text-black rounded-lg text-sm";
-      // getDateDiv.innerHTML = "";
-
-      setTimeout(() => {
-        onCloseDiv.className = "hidden";
-        onAlertDiv.className = "hidden";
-      }, 5000);
-
-      summarizeButtonDiv.innerHTML = `
-      <i
-        class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
-      ></i>
-      Summarize with AI
-      `;
-      summarizeButtonDiv.classList.remove("btn-disabled");
       summaryDiv.innerHTML = `
       <p class="text-gray-400" id="summary">
         Transcription summary with selected time will appear here
       </p>
       `;
+      resetSummarizeButton();
+    }
+  };
+
+  function resetSummarizeButton() {
+    summarizeButtonDiv.innerHTML = `
+    <i class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"></i>Summarize
+    with AI
+    `;
+    summarizeButtonDiv.classList.remove("btn-disabled");
+  }
+
+  function summarize(slug) {
+    const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
+    previewDiv.innerHTML = summaryDiv.innerHTML = loadingSpinner;
+    summarizeButtonDiv.classList.add("btn-disabled");
+    summarizeButtonDiv.innerHTML = loadingSpinner;
+    const socket = new WebSocket(`ws://localhost:8000${slug}`);
+
+    socket.onopen = () => {
+      const formatDate = (id) =>
+        `${new Date().toLocaleDateString("id-ID").replace(/\//g, "-")} ${document.getElementById(id).value}`;
+      socket.send(
+        JSON.stringify({
+          start_datetime: formatDate("time_1"),
+          end_datetime: formatDate("time_2"),
+        }),
+      );
     };
+
+    socket.onmessage = ({ data }) => {
+      const response = JSON.parse(data);
+      previewDiv.textContent = response.transcript;
+      previewDiv.classList = summaryDiv.classList = "text-black";
+      summaryDiv.textContent = response.summary || "Error summarizing";
+      resetSummarizeButton();
+    };
+
+    socket.onerror = () =>
+      handleWebSocketCloseOrError(
+        "alert-error text-white",
+        onErrorDiv,
+        "summary",
+      );
+    socket.onclose = () =>
+      handleWebSocketCloseOrError(
+        "alert-warning text-black",
+        onCloseDiv,
+        "summary",
+      );
   }
 
-  // clear audio
   async function cleanupAudioResources() {
-    if (micProcessor) {
-      micProcessor.disconnect();
-      micProcessor = null;
+    micProcessor?.disconnect();
+    micStream?.getTracks().forEach((track) => track.stop());
+    await audioContext?.close();
+    micProcessor = micStream = audioContext = null;
+  }
+
+  function resetWebSocket() {
+    if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+    ws = null;
+  }
+
+  function handleStop() {
+    startListening.classList.remove("hidden");
+    startListening.innerHTML = `
+    <i class="fa-solid fa-microphone fa-sm" style="color: #ffffff"></i> Start
+    Listening
+    `;
+    stopListening.classList.add("hidden");
+    pauseListening.classList.add("hidden");
+  }
+
+  function initWebSocket() {
+    if (!ws) {
+      ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
+      ws.onmessage = (event) => {
+        const { data } = event;
+        const isListening = data === "listening";
+        const timestamp = new Date().toString().split(" GMT")[0];
+        interimDiv.innerHTML = isListening
+          ? `<span class="loading loading-dots loading-md text-gray-500"></span>`
+          : "";
+        if (!isListening) {
+          const transcriptChar = JSON.parse(data);
+          finalDiv.innerHTML += `
+          <p>
+            <span class="font-semibold">${transcriptChar.transcription}</span><br /><span
+              class="text-xs text-gray-500"
+              >${timestamp}</span
+            >
+          </p>
+          <br />
+          `;
+        }
+        scrollToBottom();
+      };
     }
-    if (micStream) {
-      micStream.getTracks().forEach((track) => track.stop());
-      micStream = null;
-    }
-    if (audioContext && audioContext.state !== "closed") {
-      await audioContext.close();
-      audioContext = null;
+
+    ws.onerror = () =>
+      handleWebSocketCloseOrError(
+        "alert-error text-white",
+        onErrorDiv,
+        "listen",
+      );
+    ws.onclose = () =>
+      handleWebSocketCloseOrError(
+        "alert-warning text-black",
+        onCloseDiv,
+        "listen",
+      );
+  }
+
+  async function initAudio() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)({
+        sampleRate: 16000,
+      });
     }
   }
 
-  // start and stop listening
   async function startAndStopListening(command) {
-    const startListening = document.getElementById("startListening");
-    const stopListening = document.getElementById("stopListening");
-    const pauseListening = document.getElementById("pauseListening");
-
-    // reset websocket
-    async function resetWebSocket() {
-      if (ws && ws.readyState === WebSocket.OPEN) ws.close();
-      ws = null;
-    }
-
-    // handle stop button ui
-    async function handleStop() {
-      startListening.classList.remove("hidden");
-      startListening.innerHTML = `
-      <i class="fa-solid fa-microphone fa-sm" style="color: #ffffff"></i> Start
-      Listening
-      `;
-      stopListening.classList.add("hidden");
-      pauseListening.classList.add("hidden");
-    }
-
-    // display date and time badge
-    let getDateDiv = document.getElementById("getDate");
     getDateDiv.innerHTML = `<div class="badge badge-ghost">${new Date().toString().split(" GMT")[0]}</div>`;
-
-    // initiate websocket
-    async function initWebSocket() {
-      if (!ws) {
-        ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
-
-        ws.onmessage = (event) => {
-          const interimDiv = document.getElementById("interim");
-          const finalDiv = document.getElementById("final");
-
-          if (event.data === "listening") {
-            interimDiv.innerHTML = `<span class="loading loading-dots loading-md text-gray-500"></span>`;
-            // transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
-          } else {
-            const transcriptChar = JSON.parse(event.data);
-            finalDiv.innerHTML += `
-            <p>
-              <span class="font-semibold">${transcriptChar.transcription}</span>
-              <br />
-              <span class="text-xs text-gray-500"
-                >${new Date().toString().split(" GMT")[0]}</span
-              >
-            </p>
-            <br />
-            `;
-            interimDiv.innerHTML = "";
-            // transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
-          }
-        };
-      }
-
-      onAlertDiv = document.getElementById("alert");
-      onErrorDiv = document.getElementById("onerror");
-      onCloseDiv = document.getElementById("onclose");
-
-      ws.onerror = async () => {
-        onAlertDiv.className = "toast";
-        onErrorDiv.className =
-          "alert alert-error flex gap-2 fill-white text-white rounded-lg text-sm";
-        // getDateDiv.innerHTML = "";
-
-        setTimeout(() => {
-          onErrorDiv.className = "hidden";
-          onAlertDiv.className = "hidden";
-        }, 5000);
-
-        await cleanupAudioResources();
-        await handleStop();
-        await resetWebSocket();
-      };
-
-      ws.onclose = async () => {
-        onAlertDiv.className = "toast";
-        onCloseDiv.className =
-          "alert alert-warning flex gap-2 fill-black text-black rounded-lg text-sm";
-        // getDateDiv.innerHTML = "";
-
-        setTimeout(() => {
-          onCloseDiv.className = "hidden";
-          onAlertDiv.className = "hidden";
-        }, 5000);
-
-        await cleanupAudioResources();
-        await handleStop();
-        await resetWebSocket();
-      };
-    }
-
-    async function initAudio() {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)({
-          sampleRate: 16000,
-        });
-      }
-    }
-
     if (command === "start") {
       startListening.classList.add("hidden");
       stopListening.classList.remove("btn-disabled", "hidden");
       pauseListening.classList.remove("hidden", "btn-disabled");
-
-      // start websocket and activate microphone
       try {
-        if (isAlreadyStart === false) {
-          await resetWebSocket();
-          await initWebSocket();
+        if (!isAlreadyStart) {
+          resetWebSocket();
+          initWebSocket();
         }
         await cleanupAudioResources();
         await initAudio();
-
         micStream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
@@ -453,28 +405,17 @@
         console.error(error);
         await cleanupAudioResources();
       }
-    }
-
-    // stop microphone
-    else if (command === "stop") {
+    } else if (command === "stop") {
       isAlreadyStart = false;
       await cleanupAudioResources();
-      await resetWebSocket();
-      await handleStop();
-    }
-
-    // pause microphone
-    else if (command === "pause") {
+      resetWebSocket();
+      handleStop();
+    } else if (command === "pause") {
       isAlreadyStart = true;
-      if (micStream) {
-        micStream.getTracks().forEach((track) => track.stop());
-        micStream = null;
-      }
+      micStream?.getTracks().forEach((track) => track.stop());
+      micStream = null;
       startListening.classList.remove("hidden");
-      startListening.innerHTML = `
-      <i class="fa-solid fa-play fa-sm" style="color: #ffffff"></i>
-      Continue Listening
-      `;
+      startListening.innerHTML = `<i class="fa-solid fa-play fa-sm" style="color: #ffffff"></i>Continue Listening`;
       stopListening.classList.add("hidden");
       pauseListening.classList.add("hidden");
     }

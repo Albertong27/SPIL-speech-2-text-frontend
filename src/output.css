@@ -2092,10 +2092,6 @@ html {
   fill: var(--fallback-n,oklch(var(--n)/1)) !important;
 }
 
-.fill-black {
-  fill: #000;
-}
-
 .fill-white {
   fill: #fff;
 }
