@@ -73,7 +73,7 @@
                 Start Listening
               </button>
 
-              <div class="flex gap-2">
+              <div class="flex items-center gap-2">
                 <!-- stop record -->
                 <button
                   class="btn btn-disabled btn-error hidden rounded-2xl !text-white"
@@ -93,7 +93,7 @@
                   <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
                   Pause
                 </button>
-                <!-- <p class="hidden" id="countdown">3:30:00</p> -->
+                <p class="hidden" id="countdown">3:30:00</p>
               </div>
 
               <button
@@ -227,6 +227,26 @@
   let micStream = null;
   let ws = null;
 
+  let countdownTime = 3 * 3600 + 30 * 60;
+
+  function formatTime(seconds) {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    return `${hrs.toString().padStart(1, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }
+
+  const countdownElement = document.getElementById("countdown");
+  const timer = setInterval(() => {
+    if (countdownTime <= 0) {
+      clearInterval(timer);
+    } else {
+      countdownElement.textContent = formatTime(countdownTime);
+      countdownTime--;
+    }
+  }, 1000);
+
   async function preview() {
     previewDiv.innerHTML = loadingDiv;
     const end_datetime = document.getElementById("time_2").value;
@@ -357,6 +377,8 @@
   }
 
   function handleStop() {
+    countdownElement.classList.add("hidden");
+    countdownTime = 3 * 3600 + 30 * 60;
     startListening.classList.remove("hidden");
     startListening.innerHTML = `
     <i class="fa-solid fa-microphone fa-sm" style="color: #ffffff"></i> Start
@@ -427,6 +449,7 @@
 
   async function startAndStopListening(command) {
     if (command === "start") {
+      countdownElement.classList.remove("hidden");
       getDateDiv.innerHTML = `<div class="badge badge-ghost">${new Date().toString().split(" GMT")[0]}</div>`;
       startListening.classList.add("hidden");
       stopListening.classList.remove("btn-disabled", "hidden");
