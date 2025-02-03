@@ -93,7 +93,9 @@
                   <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
                   Pause
                 </button>
+                <p class="hidden" id="countdown">3:30:00</p>
               </div>
+
               <button
                 class="btn btn-circle btn-outline btn-sm"
                 onclick="scrollToBottom()"
@@ -121,8 +123,18 @@
                 type="time"
                 id="time_2"
                 class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                onchange="preview()"
                 required
               />
+              <div
+                class="tooltip tooltip-right tooltip-open"
+                data-tip="Refresh"
+                onclick="preview()"
+              >
+                <button class="btn btn-square">
+                  <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+              </div>
             </div>
             <button
               class="btn btn-outline btn-primary h-full w-fit min-w-[188px] rounded-lg"
@@ -215,6 +227,39 @@
   let micStream = null;
   let ws = null;
 
+  async function preview() {
+    previewDiv.innerHTML = loadingDiv;
+    const end_datetime = document.getElementById("time_2").value;
+    const start_datetime = document.getElementById("time_1").value;
+    const today = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
+    try {
+      let formData = new FormData();
+      formData.append("start_datetime", `${today} ${start_datetime}`);
+      formData.append("end_datetime", `${today} ${end_datetime}`);
+      const response = await fetch("http://localhost:8000/preview", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      previewDiv.textContent = result.transcript;
+      previewDiv.classList = "text-black";
+    } catch (error) {
+      console.error(error);
+      previewDiv.innerHTML = `
+      <p class="text-gray-400" id="preview">
+        Transcription summary with selected time will appear here
+      </p>
+      `;
+      onAlertDiv.className = "toast";
+      onErrorDiv.className =
+        "alert alert-error text-white flex gap-2 fill-white rounded-lg text-sm";
+      setTimeout(() => {
+        onAlertDiv.className = "hidden";
+        onErrorDiv.className = "hidden";
+      }, 5000);
+    }
+  }
+
   function scrollToBottom() {
     transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
   }
@@ -262,7 +307,7 @@
 
   function summarize(slug) {
     const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
-    previewDiv.innerHTML = summaryDiv.innerHTML = loadingSpinner;
+    summaryDiv.innerHTML = loadingSpinner;
     summarizeButtonDiv.classList.add("btn-disabled");
     summarizeButtonDiv.innerHTML = loadingSpinner;
     const socket = new WebSocket(`ws://localhost:8000${slug}`);
@@ -280,9 +325,8 @@
 
     socket.onmessage = ({ data }) => {
       const response = JSON.parse(data);
-      previewDiv.textContent = response.transcript;
-      previewDiv.classList = summaryDiv.classList = "text-black";
-      summaryDiv.textContent = response.summary || "Error summarizing";
+      summaryDiv.innerHTML = response.summary;
+      summaryDiv.classList = "text-black";
       resetSummarizeButton();
     };
 
@@ -370,9 +414,37 @@
     }
   }
 
+  var countdownTime = 5;
+
+  function formatTime(seconds) {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    return `${hrs.toString().padStart(1, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }
+
+  const countdownElement = document.getElementById("countdown");
+  var timer;
+
+  function interval() {
+    timer = setInterval(() => {
+      if (countdownTime <= 0) {
+        clearInterval(timer);
+        startAndStopListening("stop_timeout");
+      } else {
+        countdownElement.textContent = formatTime(countdownTime);
+        countdownTime--;
+      }
+    }, 1000);
+  }
+
   async function startAndStopListening(command) {
     getDateDiv.innerHTML = `<div class="badge badge-ghost">${new Date().toString().split(" GMT")[0]}</div>`;
     if (command === "start") {
+      interval();
+      countdownTime = 5;
+      countdownElement.classList.remove("hidden");
       startListening.classList.add("hidden");
       stopListening.classList.remove("btn-disabled", "hidden");
       pauseListening.classList.remove("hidden", "btn-disabled");
@@ -406,10 +478,60 @@
         await cleanupAudioResources();
       }
     } else if (command === "stop") {
+      countdownTime = 5;
+      clearInterval(timer);
+      countdownElement.classList.add("hidden");
       isAlreadyStart = false;
       await cleanupAudioResources();
       resetWebSocket();
       handleStop();
+    } else if (command === "stop_timeout") {
+      countdownTime = 5;
+      clearInterval(timer);
+      countdownElement.classList.add("hidden");
+      isAlreadyStart = false;
+      await cleanupAudioResources();
+      resetWebSocket();
+      handleStop();
+
+      // countdownTime = 5;
+      countdownElement.classList.remove("hidden");
+      startListening.classList.add("hidden");
+      stopListening.classList.remove("btn-disabled", "hidden");
+      pauseListening.classList.remove("hidden", "btn-disabled");
+      try {
+        if (!isAlreadyStart) {
+          resetWebSocket();
+          initWebSocket();
+        }
+        await cleanupAudioResources();
+        await initAudio();
+        micStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        while (audioContext === null) {
+          await initAudio();
+        }
+        const source = audioContext.createMediaStreamSource(micStream);
+        micProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+        source.connect(micProcessor);
+        micProcessor.connect(audioContext.destination);
+        
+        micProcessor.onaudioprocess = (e) => {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            const inputData = e.inputBuffer.getChannelData(0);
+            const samples = new Int16Array(inputData.length);
+            for (let i = 0; i < inputData.length; i++) {
+              samples[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7fff;
+            }
+            ws.send(samples.buffer);
+          }
+        };
+      } catch (error) {
+        console.error(error);
+        await cleanupAudioResources();
+      }
+      interval();
     } else if (command === "pause") {
       isAlreadyStart = true;
       micStream?.getTracks().forEach((track) => track.stop());
