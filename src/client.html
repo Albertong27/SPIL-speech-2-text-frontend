@@ -112,7 +112,7 @@
         <!-- time picker -->
         <div class="w-full">
           <div class="flex justify-between p-6 pb-4" id="formheight">
-            <div class="flex gap-2">
+            <div class="flex items-center gap-2">
               <input
                 type="time"
                 id="time_1"
@@ -126,15 +126,9 @@
                 onchange="preview()"
                 required
               />
-              <div
-                class="tooltip tooltip-right tooltip-open"
-                data-tip="Refresh"
-                onclick="preview()"
-              >
-                <button class="btn btn-square">
-                  <i class="fa-solid fa-arrows-rotate"></i>
-                </button>
-              </div>
+              <button class="btn btn-neutral btn-sm" onclick="preview()">
+                Refresh
+              </button>
             </div>
             <button
               class="btn btn-outline btn-primary h-full w-fit min-w-[188px] rounded-2xl"
