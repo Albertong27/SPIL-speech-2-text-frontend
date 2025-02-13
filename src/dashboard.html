@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Page</title>
+
+    <!-- tailwind -->
+    <link href="./input.css" rel="stylesheet" />
+    <link href="./output.css" rel="stylesheet" />
+
+    <!-- font poppins and roboto mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- font awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+  </head>
+
+  <body class="h-screen !space-y-6 p-10 font-poppins">
+    <section class="flex justify-between">
+      <button class="btn btn-primary rounded-2xl">New Recording</button>
+      <div>
+        <p class="text-right">Hi, Rudy!</p>
+        <button class="btn btn-ghost">
+          <i class="fas fa-sign-out"></i> Logout
+        </button>
+      </div>
+    </section>
+    <section>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <!-- head -->
+          <thead>
+            <tr>
+              <th>Room Name</th>
+              <th>Date</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- row 1 -->
+            <tr>
+              <td>Cy Ganderton</td>
+              <td>Quality Control Specialist</td>
+              <td>Blue</td>
+              <td>
+                <button
+                  class="btn rounded-2xl !border-blue-950 !bg-blue-50 !text-blue-950"
+                  onclick="my_modal_3.showModal()"
+                >
+                  Summary
+                </button>
+              </td>
+            </tr>
+            <!-- row 2 -->
+            <tr>
+              <td>Hart Hagerty</td>
+              <td>Desktop Support Technician</td>
+              <td>Purple</td>
+              <td>
+                <button
+                  class="btn rounded-2xl !border-blue-950 !bg-blue-50 !text-blue-950"
+                >
+                  Summary
+                </button>
+              </td>
+            </tr>
+            <!-- row 3 -->
+            <tr>
+              <td>Brice Swyre</td>
+              <td>Tax Accountant</td>
+              <td>Red</td>
+              <td>
+                <button
+                  class="btn rounded-2xl !border-blue-950 !bg-blue-50 !text-blue-950"
+                >
+                  Summary
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <dialog id="my_modal_3" class="modal">
+      <div class="modal-box">
+        <form method="dialog">
+          <button
+            class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+          >
+            ✕
+          </button>
+        </form>
+        <div class="overflow-x-auto">
+          <table class="table">
+            <!-- head -->
+            <thead>
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Job</th>
+                <th>Favorite Color</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- row 1 -->
+              <tr>
+                <th>1</th>
+                <td>Cy Ganderton</td>
+                <td>Quality Control Specialist</td>
+                <td>Blue</td>
+              </tr>
+              <!-- row 2 -->
+              <tr>
+                <th>2</th>
+                <td>Hart Hagerty</td>
+                <td>Desktop Support Technician</td>
+                <td>Purple</td>
+              </tr>
+              <!-- row 3 -->
+              <tr>
+                <th>3</th>
+                <td>Brice Swyre</td>
+                <td>Tax Accountant</td>
+                <td>Red</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </dialog>
+  </body>
+</html>

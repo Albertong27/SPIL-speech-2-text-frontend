@@ -34,14 +34,9 @@
           <!-- search bar -->
           <div class="h-[15vh]">
             <div
-              class="z-50 flex h-[15vh] w-full items-center justify-center rounded-tr-3xl px-10"
+              class="z-50 flex h-[15vh] w-full items-center rounded-tr-3xl px-10"
             >
-              <label
-                class="input input-bordered flex w-full items-center gap-2 rounded-2xl"
-              >
-                <input type="text" class="grow" placeholder="Search" />
-                <i class="fas fa-search fa-sm" style="color: #697079"></i>
-              </label>
+              <p class="text-xl font-semibold">Room 1</p>
             </div>
           </div>
 
@@ -112,21 +107,26 @@
         <!-- time picker -->
         <div class="w-full">
           <div class="flex justify-between p-6 pb-4" id="formheight">
-            <div class="flex items-center gap-2">
-              <input
-                type="time"
-                id="time_1"
-                class="block w-fit rounded-2xl border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                required
-              />
-              <input
-                type="time"
-                id="time_2"
-                class="block w-fit rounded-2xl border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                onchange="preview()"
-                required
-              />
-              <button class="btn btn-neutral btn-sm" onclick="preview()">
+            <div class="flex w-1/2 justify-between">
+              <div class="flex gap-2">
+                <input
+                  type="time"
+                  id="time_1"
+                  class="block w-fit rounded-2xl border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  required
+                />
+                <input
+                  type="time"
+                  id="time_2"
+                  class="block w-fit rounded-2xl border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  onchange="preview()"
+                  required
+                />
+              </div>
+              <button
+                class="btn rounded-2xl !border-gray-500 !bg-gray-50 !text-gray-500"
+                onclick="preview()"
+              >
                 Refresh
               </button>
             </div>
@@ -148,16 +148,18 @@
             <div
               class="ml-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-l-3xl border-2 border-gray-300 p-6"
             >
-              <p class="text-gray-400" id="preview">
-                Transcription summary with selected time will appear here
+              <p class="text-gray-500" id="preview">
+                <span class="text-xl font-semibold">Transcription</span> <br />
+                Transcription will appear here
               </p>
             </div>
             <!-- summary area -->
             <div
               class="mr-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-r-3xl border-2 border-l-0 border-gray-300 p-6"
             >
-              <p class="text-gray-400" id="summary">
-                Transcription summary with selected time will appear here
+              <p class="text-gray-500" id="summary">
+                <span class="text-xl font-semibold">Summary</span> <br />
+                Summary will appear here
               </p>
             </div>
           </div>
