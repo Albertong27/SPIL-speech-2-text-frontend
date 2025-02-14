@@ -24,12 +24,12 @@
     />
   </head>
 
-  <body class="h-screen !space-y-6 p-10 font-poppins">
+  <body class="h-screen !space-y-6 p-10 font-poppins" onload="logout('auto')">
     <section class="flex justify-between">
       <button class="btn btn-primary rounded-2xl">New Recording</button>
       <div>
-        <p class="text-right">Hi, Admin!</p>
-        <button class="btn btn-ghost">
+        <p class="text-right" id="account">Hi, ${name}!</p>
+        <button class="btn btn-ghost rounded-2xl" onclick="logout('press')">
           <i class="fas fa-sign-out"></i> Logout
         </button>
       </div>
@@ -51,7 +51,7 @@
         </table>
       </div>
     </section>
-    <dialog id="my_modal_3" class="modal">
+    <dialog id="my_modal_1" class="modal">
       <div class="modal-box">
         <form method="dialog">
           <button
@@ -78,100 +78,106 @@
         </div>
       </div>
     </dialog>
+    <dialog id="my_modal_2" class="modal">
+      <div class="modal-box">
+        <form method="dialog">
+          <button
+            class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+          >
+            ✕
+          </button>
+        </form>
+        <p id="summary"></p>
+      </div>
+    </dialog>
   </body>
 </html>
 
 <script>
-  // Function to fetch data from the API
-  async function fetchTableMeeting() {
-    try {
-      const response = await fetch(
-        "http://192.168.1.50:19110/api/transcribe/meeting/admin",
-      );
-      const data = await response.json();
-      return data.result;
-    } catch (error) {
-      console.error("Error fetching data:", error);
+  const API_BASE_URL = "http://192.168.1.50:19110/api";
+  const name = localStorage.getItem("result");
+  document.getElementById("account").textContent = `Hello, ${name}!`;
+
+  function logout(condition) {
+    const loginPage = "/src/login.html";
+    if ((condition === "press" && name) || (condition === "auto" && !name)) {
+      if (condition === "press") {
+        localStorage.removeItem("result");
+      }
+      location.replace(loginPage);
     }
   }
 
-  async function fetchTableSummary() {
+  async function fetchData(endpoint) {
     try {
-      const response = await fetch(
-        "http://192.168.1.50:19110/api/transcribe/summary/0",
-      );
+      const response = await fetch(`${API_BASE_URL}/transcribe/${endpoint}`);
       const data = await response.json();
-      return data.result;
+      return data.result || [];
     } catch (error) {
       console.error("Error fetching data:", error);
+      return [];
     }
   }
 
   async function renderTableMeeting() {
-    const data = await fetchTableMeeting();
+    const data = await fetchData(`meeting/${name}`);
+    const tableMeeting = document.getElementById("table_meeting");
+    if (!data.length) return;
 
-    if (!data) {
-      return;
-    }
-
-    let i = 0;
-
-    data.forEach((item) => {
-      const table_meeting = document.getElementById("table_meeting");
-      table_meeting.innerHTML += `
-      <tbody id="table_meeting">
-        <tr>
-          <th>${(i += 1)}</th>
-          <td>${item.ROOM_NAME}</td>
-          <td>${item.ID}</td>
-          <td>${item.IS_ENABLED}</td>
-          <td class="flex justify-end">
-            <button
-              class="btn rounded-xl btn-secondary"
-              onclick="my_modal_3.showModal()"
-            >
-              Summary
-            </button>
-          </td>
-        </tr>
-      </tbody>`;
-    });
+    tableMeeting.innerHTML = data
+      .map(
+        (item, index) => `
+    <tr>
+      <th>${index + 1}</th>
+      <td>${item.ROOM_NAME}</td>
+      <td>${item.ID}</td>
+      <td>${item.IS_ENABLED}</td>
+      <td class="flex justify-end">
+        <button class="btn rounded-2xl btn-secondary" onclick="renderTableSummary('${name}'); my_modal_1.showModal();">
+          Summary
+        </button>
+      </td>
+    </tr>
+  `,
+      )
+      .join("");
   }
 
-  async function renderTableSummary() {
-    const data = await fetchTableSummary();
+  async function renderTableSummary(createdBy) {
+    const data = await fetchData("summary/0");
+    const tableSummary = document.getElementById("table_summary");
+    if (!data.length) return;
 
-    if (!data) {
-      return;
-    }
-
-    let i = 0;
-
-    data.forEach((item) => {
-      const table_summary = document.getElementById("table_summary");
-      table_summary.innerHTML += `
-      <tbody id="table_summary">
-        <tr>
-          <th>${item.ID}</th>
-          <th>${item.ID_ROOM}</th>
-          <td>${item.RAW_START_TIME}</td>
-          <td>${item.RAW_END_TIME}</td>
-          <td>${item.CREATED_ON}</td>
-          <td>${item.CREATED_BY}</td>
-          <td class="flex justify-end">
-            <button
-              class="btn btn-square rounded-xl btn-secondary"
-              onclick="my_modal_3.showModal()"
-            >
-              <i class="fa-solid fa-eye"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>`;
-    });
+    tableSummary.innerHTML = data
+      .filter((item) => item.CREATED_BY === createdBy)
+      .map(
+        (item) => `
+      <tr>
+        <th>${item.ID}</th>
+        <th>${item.ID_ROOM}</th>
+        <td>${item.RAW_START_TIME}</td>
+        <td>${item.RAW_END_TIME}</td>
+        <td>${item.CREATED_ON}</td>
+        <td>${item.CREATED_BY}</td>
+        <td class="flex justify-end">
+          <button class="btn btn-square rounded-2xl btn-secondary" onclick="renderSummary(${item.ID}); my_modal_2.showModal();">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </td>
+      </tr>
+    `,
+      )
+      .join("");
   }
 
-  // Call the renderTableMeeting function to display data
+  async function renderSummary(id) {
+    const summaryElement = document.getElementById("summary");
+    const data = await fetchData(`summary/0/${id}`);
+    if (!data.length) return;
+
+    summaryElement.innerHTML = data[0].SUMMARIZED_OUTPUT;
+  }
+
+  // Initialize table rendering
   renderTableMeeting();
-  renderTableSummary();
 </script>

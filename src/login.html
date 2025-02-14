@@ -26,6 +26,7 @@
 
   <body
     class="flex h-screen w-full flex-col items-center justify-center gap-10 font-poppins"
+    onload="handleRedirection()"
   >
     <img
       src="https://www.spil.co.id/img/spil_logo.581f4306.svg"
@@ -66,10 +67,21 @@
       </button>
     </form>
   </body>
+  <p class="absolute bottom-8 left-1/2 -translate-x-1/2 transform">
+    © PT SPIL 2025 V.0.1
+  </p>
 </html>
 
 <script>
+  const API_BASE_URL = "http://192.168.1.50:19110/api";
   const form = document.querySelector("#userinfo");
+  const dashboardPage = "/src/dashboard.html";
+
+  function handleRedirection() {
+    if (localStorage.getItem("result")) {
+      location.replace(dashboardPage);
+    }
+  }
 
   async function hashPassword(password) {
     const encoder = new TextEncoder();
@@ -88,15 +100,17 @@
     formData.append("is_encrypted", "1");
 
     try {
-      const response = await fetch(
-        "http://192.168.1.50:19110/api/transcribe/login",
-        {
-          method: "POST",
-          // Set the FormData instance as the request body
-          body: formData,
-        },
-      );
-      console.log(await response.json());
+      const response = await fetch(`${API_BASE_URL}/transcribe/login`, {
+        method: "POST",
+        // Set the FormData instance as the request body
+        body: formData,
+      });
+
+      const res = await response.json();
+      if (res.status === "success") {
+        localStorage.setItem("result", res.result);
+        location.replace(dashboardPage);
+      }
     } catch (e) {
       console.error(e);
     }
