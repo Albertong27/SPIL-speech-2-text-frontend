@@ -28,7 +28,7 @@
     <section class="flex justify-between">
       <button class="btn btn-primary rounded-2xl">New Recording</button>
       <div>
-        <p class="text-right">Hi, Rudy!</p>
+        <p class="text-right">Hi, Admin!</p>
         <button class="btn btn-ghost">
           <i class="fas fa-sign-out"></i> Logout
         </button>
@@ -40,55 +40,14 @@
           <!-- head -->
           <thead>
             <tr>
+              <th></th>
               <th>Room Name</th>
-              <th>Date</th>
-              <th>Start Time</th>
-              <th>End Time</th>
+              <th>ID</th>
+              <th>Is Enabled?</th>
               <th></th>
             </tr>
           </thead>
-          <tbody>
-            <!-- row 1 -->
-            <tr>
-              <td>Cy Ganderton</td>
-              <td>Quality Control Specialist</td>
-              <td>Blue</td>
-              <td>
-                <button
-                  class="btn rounded-2xl !border-blue-950 !bg-blue-50 !text-blue-950"
-                  onclick="my_modal_3.showModal()"
-                >
-                  Summary
-                </button>
-              </td>
-            </tr>
-            <!-- row 2 -->
-            <tr>
-              <td>Hart Hagerty</td>
-              <td>Desktop Support Technician</td>
-              <td>Purple</td>
-              <td>
-                <button
-                  class="btn rounded-2xl !border-blue-950 !bg-blue-50 !text-blue-950"
-                >
-                  Summary
-                </button>
-              </td>
-            </tr>
-            <!-- row 3 -->
-            <tr>
-              <td>Brice Swyre</td>
-              <td>Tax Accountant</td>
-              <td>Red</td>
-              <td>
-                <button
-                  class="btn rounded-2xl !border-blue-950 !bg-blue-50 !text-blue-950"
-                >
-                  Summary
-                </button>
-              </td>
-            </tr>
-          </tbody>
+          <tbody id="table_meeting"></tbody>
         </table>
       </div>
     </section>
@@ -106,38 +65,113 @@
             <!-- head -->
             <thead>
               <tr>
-                <th></th>
-                <th>Name</th>
-                <th>Job</th>
-                <th>Favorite Color</th>
+                <th>ID</th>
+                <th>ID Room</th>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Created By</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- row 1 -->
-              <tr>
-                <th>1</th>
-                <td>Cy Ganderton</td>
-                <td>Quality Control Specialist</td>
-                <td>Blue</td>
-              </tr>
-              <!-- row 2 -->
-              <tr>
-                <th>2</th>
-                <td>Hart Hagerty</td>
-                <td>Desktop Support Technician</td>
-                <td>Purple</td>
-              </tr>
-              <!-- row 3 -->
-              <tr>
-                <th>3</th>
-                <td>Brice Swyre</td>
-                <td>Tax Accountant</td>
-                <td>Red</td>
-              </tr>
-            </tbody>
+            <tbody id="table_summary"></tbody>
           </table>
         </div>
       </div>
     </dialog>
   </body>
 </html>
+
+<script>
+  // Function to fetch data from the API
+  async function fetchTableMeeting() {
+    try {
+      const response = await fetch(
+        "http://192.168.1.50:19110/api/transcribe/meeting/admin",
+      );
+      const data = await response.json();
+      return data.result;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  async function fetchTableSummary() {
+    try {
+      const response = await fetch(
+        "http://192.168.1.50:19110/api/transcribe/summary/0",
+      );
+      const data = await response.json();
+      return data.result;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  async function renderTableMeeting() {
+    const data = await fetchTableMeeting();
+
+    if (!data) {
+      return;
+    }
+
+    let i = 0;
+
+    data.forEach((item) => {
+      const table_meeting = document.getElementById("table_meeting");
+      table_meeting.innerHTML += `
+      <tbody id="table_meeting">
+        <tr>
+          <th>${(i += 1)}</th>
+          <td>${item.ROOM_NAME}</td>
+          <td>${item.ID}</td>
+          <td>${item.IS_ENABLED}</td>
+          <td class="flex justify-end">
+            <button
+              class="btn rounded-xl btn-secondary"
+              onclick="my_modal_3.showModal()"
+            >
+              Summary
+            </button>
+          </td>
+        </tr>
+      </tbody>`;
+    });
+  }
+
+  async function renderTableSummary() {
+    const data = await fetchTableSummary();
+
+    if (!data) {
+      return;
+    }
+
+    let i = 0;
+
+    data.forEach((item) => {
+      const table_summary = document.getElementById("table_summary");
+      table_summary.innerHTML += `
+      <tbody id="table_summary">
+        <tr>
+          <th>${item.ID}</th>
+          <th>${item.ID_ROOM}</th>
+          <td>${item.RAW_START_TIME}</td>
+          <td>${item.RAW_END_TIME}</td>
+          <td>${item.CREATED_ON}</td>
+          <td>${item.CREATED_BY}</td>
+          <td class="flex justify-end">
+            <button
+              class="btn btn-square rounded-xl btn-secondary"
+              onclick="my_modal_3.showModal()"
+            >
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>`;
+    });
+  }
+
+  // Call the renderTableMeeting function to display data
+  renderTableMeeting();
+  renderTableSummary();
+</script>
