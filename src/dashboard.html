@@ -26,9 +26,14 @@
 
   <body class="h-screen !space-y-6 p-10 font-poppins" onload="logout('auto')">
     <section class="flex justify-between">
-      <button class="btn btn-primary rounded-2xl">New Recording</button>
+      <button
+        onclick="my_modal_3.showModal()"
+        class="btn btn-primary rounded-2xl"
+      >
+        New Recording
+      </button>
       <div>
-        <p class="text-right" id="account">Hi, ${name}!</p>
+        <p class="text-right" id="account"></p>
         <button class="btn btn-ghost rounded-2xl" onclick="logout('press')">
           <i class="fas fa-sign-out"></i> Logout
         </button>
@@ -90,23 +95,94 @@
         <p id="summary"></p>
       </div>
     </dialog>
+    <dialog id="my_modal_3" class="modal">
+      <div class="modal-box">
+        <form method="dialog">
+          <button
+            class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+          >
+            ✕
+          </button>
+        </form>
+        <form
+          id="usercreatemeeting"
+          class="flex flex-col items-center justify-center gap-6"
+        >
+          <label class="form-control w-full max-w-xs">
+            <div class="label">
+              <span class="label-text">Meeting Name</span>
+            </div>
+            <input
+              required
+              name="meeting_name"
+              type="text"
+              placeholder="Enter your email"
+              class="input input-bordered w-full rounded-xl"
+            />
+          </label>
+          <label class="form-control w-full max-w-xs">
+            <div class="label">
+              <span class="label-text">Meeting Topic</span>
+            </div>
+            <input
+              required
+              name="meeting_topic"
+              type="text"
+              placeholder="Enter your password"
+              class="input input-bordered w-full rounded-xl"
+            />
+          </label>
+          <button
+            type="submit"
+            value="submit"
+            class="btn btn-neutral w-full max-w-xs rounded-xl"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </dialog>
   </body>
 </html>
-
+<script src="together.js"></script>
 <script>
   const API_BASE_URL = "http://192.168.1.50:19110/api";
-  const name = localStorage.getItem("result");
-  document.getElementById("account").textContent = `Hello, ${name}!`;
 
-  function logout(condition) {
-    const loginPage = "/src/login.html";
-    if ((condition === "press" && name) || (condition === "auto" && !name)) {
-      if (condition === "press") {
-        localStorage.removeItem("result");
+  const form = document.querySelector("#usercreatemeeting");
+  async function sendData() {
+    // Associate the FormData object with the form element
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/transcribe/meeting/${username}/create`,
+        {
+          method: "POST",
+          // Set the FormData instance as the request body
+          body: formData,
+        },
+      );
+
+      const res = await response.json();
+      if (res.status === "success") {
+        ["meeting_name", "meeting_topic"].forEach((key) => {
+          localStorage.setItem(
+            key === "meeting_name" ? "meetingName" : "meetingTopic",
+            formData.get(key),
+          );
+        });
+        location.replace("/src/client.html");
       }
-      location.replace(loginPage);
+    } catch (e) {
+      console.error(e);
     }
   }
+
+  // Take over form submission
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    sendData();
+  });
 
   async function fetchData(endpoint) {
     try {
@@ -120,7 +196,7 @@
   }
 
   async function renderTableMeeting() {
-    const data = await fetchData(`meeting/${name}`);
+    const data = await fetchData(`meeting/${username}`);
     const tableMeeting = document.getElementById("table_meeting");
     if (!data.length) return;
 
@@ -133,7 +209,7 @@
       <td>${item.ID}</td>
       <td>${item.IS_ENABLED}</td>
       <td class="flex justify-end">
-        <button class="btn rounded-2xl btn-secondary" onclick="renderTableSummary('${name}'); my_modal_1.showModal();">
+        <button class="btn rounded-2xl btn-secondary" onclick="renderTableSummary('${username}'); my_modal_1.showModal();">
           Summary
         </button>
       </td>

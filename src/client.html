@@ -24,7 +24,7 @@
     />
   </head>
 
-  <body class="font-poppins">
+  <body class="font-poppins" onload="logout('auto')">
     <section class="flex">
       <!-- left side -->
       <div
@@ -34,9 +34,17 @@
           <!-- search bar -->
           <div class="h-[15vh]">
             <div
-              class="z-50 flex h-[15vh] w-full items-center rounded-tr-3xl px-10"
+              class="z-50 flex h-[15vh] w-full items-center justify-between rounded-tr-3xl px-10"
             >
-              <p class="text-xl font-semibold">Room 1</p>
+              <button
+                onclick="my_modal_3.showModal()"
+                class="btn btn-circle btn-outline btn-neutral btn-sm"
+              >
+                <i class="fa-solid fa-circle-info"></i>
+              </button>
+              <div class="flex flex-col items-end">
+                <p id="account"></p>
+              </div>
             </div>
           </div>
 
@@ -183,6 +191,19 @@
           </div>
         </div>
       </dialog>
+
+      <dialog id="my_modal_3" class="modal">
+        <div class="modal-box">
+          <form method="dialog">
+            <button
+              class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+            >
+              ✕
+            </button>
+          </form>
+          <div id="information"></div>
+        </div>
+      </dialog>
     </section>
 
     <!-- alert -->
@@ -202,6 +223,7 @@
   </body>
 </html>
 
+<script src="together.js"></script>
 <script>
   const finalDiv = document.getElementById("final");
   const getDateDiv = document.getElementById("getDate");
@@ -222,6 +244,16 @@
   let micProcessor = null;
   let micStream = null;
   let ws = null;
+
+  function information() {
+    const informationDiv = document.getElementById("information");
+    informationDiv.innerHTML = `
+      <h3 class="text-lg font-bold">${localStorage.getItem("meetingName")}</h3>
+      <p class="py-4">${localStorage.getItem("meetingTopic")}</p>
+    `;
+  }
+
+  information();
 
   let countdownTime = 3 * 3600 + 30 * 60;
 
