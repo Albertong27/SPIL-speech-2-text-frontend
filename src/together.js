@@ -7,9 +7,8 @@ function logout(condition) {
     (condition === "auto" && !username)
   ) {
     if (condition === "press") {
-      localStorage.removeItem("result");
-      localStorage.removeItem("meetingName");
-      localStorage.removeItem("meetingTopic");
+      const items = ["result", "meetingName", "meetingTopic"];
+      items.forEach((item) => localStorage.removeItem(item));
     }
     location.replace(loginPage);
   }

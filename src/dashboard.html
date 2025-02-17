@@ -24,6 +24,86 @@
     />
   </head>
 
+  <dialog id="my_modal_2" class="modal">
+    <div class="modal-box h-[90vh] w-[90%] max-w-none">
+      <form method="dialog">
+        <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <p id="summary"></p>
+    </div>
+  </dialog>
+  <dialog id="my_modal_1" class="modal">
+    <div class="modal-box">
+      <form method="dialog">
+        <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <!-- head -->
+          <thead>
+            <tr>
+              <!-- <th>ID</th>
+              <th>ID Room</th> -->
+              <th>Date</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Created By</th>
+            </tr>
+          </thead>
+          <tbody id="table_summary"></tbody>
+        </table>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="my_modal_3" class="modal">
+    <div class="modal-box w-fit">
+      <form method="dialog">
+        <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <form
+        id="usercreatemeeting"
+        class="flex flex-col items-center justify-center gap-6"
+      >
+        <label class="form-control w-full max-w-xs">
+          <div class="label">
+            <span class="label-text">Meeting Name</span>
+          </div>
+          <input
+            required
+            name="meeting_name"
+            type="text"
+            placeholder="Enter your email"
+            class="input input-bordered w-full rounded-xl"
+          />
+        </label>
+        <label class="form-control w-full max-w-xs">
+          <div class="label">
+            <span class="label-text">Meeting Topic</span>
+          </div>
+          <input
+            required
+            name="meeting_topic"
+            type="text"
+            placeholder="Enter your password"
+            class="input input-bordered w-full rounded-xl"
+          />
+        </label>
+        <button
+          type="submit"
+          value="submit"
+          class="btn btn-neutral w-full max-w-xs rounded-xl"
+        >
+          Submit
+        </button>
+      </form>
+    </div>
+  </dialog>
   <body class="h-screen !space-y-6 p-10 font-poppins" onload="logout('auto')">
     <section class="flex justify-between">
       <button
@@ -46,9 +126,10 @@
           <thead>
             <tr>
               <th></th>
-              <th>Room Name</th>
-              <th>ID</th>
-              <th>Is Enabled?</th>
+              <th>Meeting Name</th>
+              <!-- Room Name -->
+              <!-- <th>ID</th>
+              <th>Is Enabled?</th> -->
               <th></th>
             </tr>
           </thead>
@@ -56,92 +137,6 @@
         </table>
       </div>
     </section>
-    <dialog id="my_modal_1" class="modal">
-      <div class="modal-box">
-        <form method="dialog">
-          <button
-            class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
-          >
-            ✕
-          </button>
-        </form>
-        <div class="overflow-x-auto">
-          <table class="table">
-            <!-- head -->
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>ID Room</th>
-                <th>Date</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Created By</th>
-              </tr>
-            </thead>
-            <tbody id="table_summary"></tbody>
-          </table>
-        </div>
-      </div>
-    </dialog>
-    <dialog id="my_modal_2" class="modal">
-      <div class="modal-box">
-        <form method="dialog">
-          <button
-            class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
-          >
-            ✕
-          </button>
-        </form>
-        <p id="summary"></p>
-      </div>
-    </dialog>
-    <dialog id="my_modal_3" class="modal">
-      <div class="modal-box">
-        <form method="dialog">
-          <button
-            class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
-          >
-            ✕
-          </button>
-        </form>
-        <form
-          id="usercreatemeeting"
-          class="flex flex-col items-center justify-center gap-6"
-        >
-          <label class="form-control w-full max-w-xs">
-            <div class="label">
-              <span class="label-text">Meeting Name</span>
-            </div>
-            <input
-              required
-              name="meeting_name"
-              type="text"
-              placeholder="Enter your email"
-              class="input input-bordered w-full rounded-xl"
-            />
-          </label>
-          <label class="form-control w-full max-w-xs">
-            <div class="label">
-              <span class="label-text">Meeting Topic</span>
-            </div>
-            <input
-              required
-              name="meeting_topic"
-              type="text"
-              placeholder="Enter your password"
-              class="input input-bordered w-full rounded-xl"
-            />
-          </label>
-          <button
-            type="submit"
-            value="submit"
-            class="btn btn-neutral w-full max-w-xs rounded-xl"
-          >
-            Submit
-          </button>
-        </form>
-      </div>
-    </dialog>
   </body>
 </html>
 <script src="together.js"></script>
@@ -206,8 +201,8 @@
     <tr>
       <th>${index + 1}</th>
       <td>${item.ROOM_NAME}</td>
-      <td>${item.ID}</td>
-      <td>${item.IS_ENABLED}</td>
+      <!-- <td>${item.ID}</td>
+      <td>${item.IS_ENABLED}</td> -->
       <td class="flex justify-end">
         <button class="btn rounded-2xl btn-secondary" onclick="renderTableSummary('${username}'); my_modal_1.showModal();">
           Summary
@@ -229,8 +224,8 @@
       .map(
         (item) => `
       <tr>
-        <th>${item.ID}</th>
-        <th>${item.ID_ROOM}</th>
+        <!-- <th>${item.ID}</th>
+        <th>${item.ID_ROOM}</th> -->
         <td>${item.RAW_START_TIME}</td>
         <td>${item.RAW_END_TIME}</td>
         <td>${item.CREATED_ON}</td>
