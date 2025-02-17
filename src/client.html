@@ -244,6 +244,10 @@
   let micProcessor = null;
   let micStream = null;
   let ws = null;
+  let raw_input = "",
+    raw_start = "",
+    raw_end = "",
+    id_room = "";
 
   function information() {
     const informationDiv = document.getElementById("information");
@@ -432,7 +436,8 @@
           : "";
         if (!isListening) {
           const transcriptChar = JSON.parse(data);
-          if (transcriptChar.transcription !== undefined) {
+          if (transcriptChar.transcription) {
+            raw_input += `${transcriptChar.transcription} `;
             finalDiv.innerHTML += `
             <p>
               <span class="font-semibold">${transcriptChar.transcription}</span><br /><span
@@ -477,6 +482,7 @@
 
   async function startAndStopListening(command) {
     if (command === "start") {
+      raw_start = new Date();
       countdownElement.classList.remove("hidden");
       getDateDiv.innerHTML = `<div class="badge badge-ghost">${new Date().toString().split(" GMT")[0]}</div>`;
       startListening.classList.add("hidden");
@@ -516,10 +522,13 @@
         await cleanupAudioResources();
       }
     } else if (command === "stop") {
+      raw_end = new Date();
       isAlreadyStart = false;
       await cleanupAudioResources();
       resetWebSocket();
       handleStop();
+      await handleSummarize();
+      console.log(raw_input, raw_start, raw_end);
     } else if (command === "pause") {
       isAlreadyStart = true;
       micStream?.getTracks().forEach((track) => track.stop());
@@ -528,6 +537,28 @@
       startListening.innerHTML = `<i class="fa-solid fa-play fa-sm" style="color: #ffffff"></i>Continue Listening`;
       stopListening.classList.add("hidden");
       pauseListening.classList.add("hidden");
+    }
+  }
+
+  async function handleSummarize() {
+    const API_BASE_URL = "http://192.168.1.50:19110/api";
+    const formData = new FormData();
+    formData.append("raw_input", raw_input);
+    formData.append("raw_start", raw_start);
+    formData.append("raw_end", raw_end);
+    formData.append("id_room", "0");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/transcribe/summarize`, {
+        method: "POST",
+        // Set the FormData instance as the request body
+        body: formData,
+      });
+
+      const res = await response.json();
+      summaryDiv.textContent = res.result.response;
+    } catch (e) {
+      console.error(e);
     }
   }
 </script>

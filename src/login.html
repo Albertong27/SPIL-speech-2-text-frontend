@@ -26,7 +26,7 @@
 
   <body
     class="flex h-screen w-full flex-col items-center justify-center gap-10 font-poppins"
-    onload="handleRedirection()"
+    onload="logout('auto')"
   >
     <img
       src="https://www.spil.co.id/img/spil_logo.581f4306.svg"
@@ -72,16 +72,10 @@
   </p>
 </html>
 
+<script src="together.js"></script>
 <script>
   const API_BASE_URL = "http://192.168.1.50:19110/api";
   const form = document.querySelector("#userinfo");
-  const dashboardPage = "/src/dashboard.html";
-
-  function handleRedirection() {
-    if (localStorage.getItem("result")) {
-      location.replace(dashboardPage);
-    }
-  }
 
   async function hashPassword(password) {
     const encoder = new TextEncoder();
@@ -109,7 +103,7 @@
       const res = await response.json();
       if (res.status === "success") {
         localStorage.setItem("result", res.result);
-        location.replace(dashboardPage);
+        location.replace("/src/dashboard.html");
       }
     } catch (e) {
       console.error(e);

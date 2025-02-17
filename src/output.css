@@ -2538,6 +2538,10 @@ html {
   height: 70vh;
 }
 
+.h-\[90vh\] {
+  height: 90vh;
+}
+
 .h-\[calc\(100vh-88px-24px\)\] {
   height: calc(100vh - 88px - 24px);
 }
@@ -2548,10 +2552,6 @@ html {
 
 .h-screen {
   height: 100vh;
-}
-
-.h-\[90vh\] {
-  height: 90vh;
 }
 
 .w-1\/2 {

@@ -1,7 +1,16 @@
 const username = localStorage.getItem("result");
+const meetingName = localStorage.getItem("meetingName");
+const meetingTopic = localStorage.getItem("meetingTopic");
 
 function logout(condition) {
-  const loginPage = "/src/login.html";
+  if (condition === "auto" && username) {
+    if (!meetingName && !meetingTopic) {
+      if (!window.location.href.includes("/src/dashboard.html")) {
+        location.replace("/src/dashboard.html");
+      }
+    }
+  }
+
   if (
     (condition === "press" && username) ||
     (condition === "auto" && !username)
@@ -10,8 +19,13 @@ function logout(condition) {
       const items = ["result", "meetingName", "meetingTopic"];
       items.forEach((item) => localStorage.removeItem(item));
     }
-    location.replace(loginPage);
+
+    if (!window.location.href.includes("src/login.html")) {
+      location.replace("/src/login.html");
+    }
   }
 }
 
-document.getElementById("account").textContent = `Hello, ${username}!`;
+if (username) {
+  document.getElementById("account").textContent = `Hello, ${username}!`;
+}
