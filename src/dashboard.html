@@ -24,97 +24,14 @@
     />
   </head>
 
-  <dialog id="my_modal_2" class="modal">
-    <div class="modal-box h-[90vh] w-[90%] max-w-none">
-      <form method="dialog">
-        <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
-          ✕
-        </button>
-      </form>
-      <p id="summary"></p>
-    </div>
-  </dialog>
-  <dialog id="my_modal_1" class="modal">
-    <div class="modal-box">
-      <form method="dialog">
-        <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
-          ✕
-        </button>
-      </form>
-      <div class="overflow-x-auto">
-        <table class="table">
-          <!-- head -->
-          <thead>
-            <tr>
-              <!-- <th>ID</th>
-              <th>ID Room</th> -->
-              <th>Date</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>Created By</th>
-            </tr>
-          </thead>
-          <tbody id="table_summary"></tbody>
-        </table>
-      </div>
-    </div>
-  </dialog>
-  <dialog id="my_modal_3" class="modal">
-    <div class="modal-box w-fit">
-      <form method="dialog">
-        <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
-          ✕
-        </button>
-      </form>
-      <form
-        id="usercreatemeeting"
-        class="flex flex-col items-center justify-center gap-6"
-      >
-        <label class="form-control w-full max-w-xs">
-          <div class="label">
-            <span class="label-text">Meeting Name</span>
-          </div>
-          <input
-            required
-            name="meeting_name"
-            type="text"
-            placeholder="Enter your email"
-            class="input input-bordered w-full rounded-xl"
-          />
-        </label>
-        <label class="form-control w-full max-w-xs">
-          <div class="label">
-            <span class="label-text">Meeting Topic</span>
-          </div>
-          <input
-            required
-            name="meeting_topic"
-            type="text"
-            placeholder="Enter your password"
-            class="input input-bordered w-full rounded-xl"
-          />
-        </label>
-        <button
-          type="submit"
-          value="submit"
-          class="btn btn-neutral w-full max-w-xs rounded-xl"
-        >
-          Submit
-        </button>
-      </form>
-    </div>
-  </dialog>
-  <body class="h-screen !space-y-6 p-10 font-poppins" onload="logout('auto')">
+  <body class="!space-y-6 p-10 font-poppins" onload="logout('auto')">
     <section class="flex justify-between">
-      <button
-        onclick="my_modal_3.showModal()"
-        class="btn btn-primary rounded-2xl"
-      >
+      <button onclick="my_modal_3.showModal()" class="btn btn-primary">
         New Recording
       </button>
       <div>
         <p class="text-right" id="account"></p>
-        <button class="btn btn-ghost rounded-2xl" onclick="logout('press')">
+        <button class="btn btn-ghost" onclick="logout('press')">
           <i class="fas fa-sign-out"></i> Logout
         </button>
       </div>
@@ -136,6 +53,85 @@
           <tbody id="table_meeting"></tbody>
         </table>
       </div>
+      <dialog id="my_modal_2" class="modal">
+        <div class="modal-box h-[90vh] w-[90%] max-w-none">
+          <form method="dialog">
+            <button
+              class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+            >
+              ✕
+            </button>
+          </form>
+          <p id="summary"></p>
+        </div>
+      </dialog>
+      <dialog id="my_modal_1" class="modal">
+        <div class="modal-box w-[90%] max-w-none">
+          <form method="dialog">
+            <button
+              class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+            >
+              ✕
+            </button>
+          </form>
+          <p class="text-lg font-semibold">Summary List</p>
+          <br />
+          <div class="overflow-x-auto">
+            <table class="table">
+              <!-- head -->
+              <thead>
+                <tr>
+                  <!-- <th>ID</th>
+                  <th>ID Room</th> -->
+                  <th>Date</th>
+                  <th>Start Time</th>
+                  <th>End Time</th>
+                  <th>Created By</th>
+                </tr>
+              </thead>
+              <tbody id="table_summary"></tbody>
+            </table>
+          </div>
+        </div>
+      </dialog>
+      <dialog id="my_modal_3" class="modal">
+        <div class="modal-box w-4/12 max-w-none">
+          <form method="dialog">
+            <button
+              class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+            >
+              ✕
+            </button>
+          </form>
+          <form
+            id="usercreatemeeting"
+            class="flex flex-col items-center justify-center gap-8"
+          >
+            <div class="w-full space-y-4">
+              <label class="form-control">
+                <input
+                  required
+                  name="meeting_name"
+                  type="text"
+                  placeholder="Enter meeting name"
+                  class="input input-bordered"
+                />
+              </label>
+              <label class="form-control">
+                <textarea
+                  required
+                  name="meeting_topic"
+                  class="textarea textarea-bordered h-48"
+                  placeholder="Enter meeting topic"
+                ></textarea>
+              </label>
+            </div>
+            <button type="submit" value="submit" class="btn w-full">
+              Submit
+            </button>
+          </form>
+        </div>
+      </dialog>
     </section>
   </body>
 </html>
@@ -204,7 +200,7 @@
       <!-- <td>${item.ID}</td>
       <td>${item.IS_ENABLED}</td> -->
       <td class="flex justify-end">
-        <button class="btn rounded-2xl btn-secondary" onclick="renderTableSummary('${username}'); my_modal_1.showModal();">
+        <button class="btn !bg-[#16A34A] !text-white" onclick="renderTableSummary('${username}'); my_modal_1.showModal();">
           Summary
         </button>
       </td>
@@ -231,7 +227,7 @@
         <td>${item.CREATED_ON}</td>
         <td>${item.CREATED_BY}</td>
         <td class="flex justify-end">
-          <button class="btn btn-square rounded-2xl btn-secondary" onclick="renderSummary(${item.ID}); my_modal_2.showModal();">
+          <button class="btn btn-square !bg-[#16A34A] !text-white" onclick="renderSummary(${item.ID}); my_modal_2.showModal();">
             <i class="fa-solid fa-eye"></i>
           </button>
         </td>

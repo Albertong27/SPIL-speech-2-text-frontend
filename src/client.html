@@ -27,14 +27,12 @@
   <body class="font-poppins" onload="logout('auto')">
     <section class="flex">
       <!-- left side -->
-      <div
-        class="flex h-screen w-[35%] flex-col rounded-r-3xl border-r-2 border-gray-300"
-      >
+      <div class="flex h-screen w-[35%] flex-col shadow-lg">
         <div class="w-full">
-          <!-- search bar -->
+          <!-- information bar -->
           <div class="h-[15vh]">
             <div
-              class="z-50 flex h-[15vh] w-full items-center justify-between rounded-tr-3xl px-10"
+              class="z-50 flex h-[15vh] w-full items-center justify-between px-10"
             >
               <button
                 onclick="my_modal_3.showModal()"
@@ -54,18 +52,18 @@
               <div class="space-y-6 overflow-auto px-10" id="transcription">
                 <div id="getDate"></div>
                 <p>
-                  <span class="font-semibold" id="final"></span>
-                  <span class="text-gray-300" id="interim"></span>
+                  <span class="text-sm" id="final"></span>
+                  <span class="text-sm text-gray-300" id="interim"></span>
                 </p>
               </div>
             </div>
           </div>
 
-          <div class="fixed bottom-0 h-[15vh] w-[35%] rounded-br-3xl">
+          <div class="fixed bottom-0 h-[15vh] w-[35%]">
             <div class="flex h-[15vh] items-center justify-between px-10">
               <!-- start record -->
               <button
-                class="btn btn-primary w-fit flex-none rounded-2xl"
+                class="btn btn-primary w-fit flex-none"
                 id="startListening"
                 onclick="startAndStopListening('start')"
               >
@@ -77,9 +75,19 @@
               </button>
 
               <div class="flex items-center gap-2">
+                <!-- pause record -->
+                <button
+                  class="btn btn-info hidden !text-white"
+                  id="pauseListening"
+                  onclick="startAndStopListening('pause')"
+                >
+                  <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
+                  Pause
+                </button>
+
                 <!-- stop record -->
                 <button
-                  class="btn btn-disabled btn-error hidden rounded-2xl !text-white"
+                  class="btn btn-disabled btn-error hidden !text-white"
                   id="stopListening"
                   onclick="my_modal_1.showModal()"
                 >
@@ -87,15 +95,6 @@
                   Stop
                 </button>
 
-                <!-- pause record -->
-                <button
-                  class="btn btn-info hidden rounded-2xl !text-white"
-                  id="pauseListening"
-                  onclick="startAndStopListening('pause')"
-                >
-                  <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
-                  Pause
-                </button>
                 <p class="hidden" id="countdown">3:30:00</p>
               </div>
 
@@ -114,47 +113,45 @@
       <div class="mx-auto flex w-[65%]" id="rideSide">
         <!-- time picker -->
         <div class="w-full">
-          <div class="flex justify-between p-6 pb-4" id="formheight">
+          <div class="flex gap-2 p-6 pb-4" id="formheight">
             <div class="flex w-1/2 justify-between">
               <div class="flex gap-2">
                 <input
                   type="time"
                   id="time_1"
-                  class="block w-fit rounded-2xl border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                   required
                 />
                 <input
                   type="time"
                   id="time_2"
-                  class="block w-fit rounded-2xl border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                  onchange="preview()"
+                  class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  onchange="preview('')"
                   required
                 />
               </div>
-              <button
-                class="btn rounded-2xl !border-gray-500 !bg-gray-50 !text-gray-500"
-                onclick="preview()"
-              >
-                Refresh
+              <button class="btn btn-neutral" onclick="preview('')">
+                Preview Data
               </button>
             </div>
             <button
-              class="btn btn-outline btn-primary h-full w-fit min-w-[188px] rounded-2xl"
+              class="btn h-full w-fit min-w-[188px] !bg-[#16A34A] !text-white"
               type="submit"
-              onclick="summarize('/summarizer')"
               id="summarizeButton"
+              onclick="preview('mintaPreview')"
             >
+              <!-- onclick="summarize('/summarizer')" -->
               <i
                 class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
               ></i>
-              Summarize with AI
+              Generate Summary
             </button>
           </div>
 
           <!-- preview area -->
-          <div class="flex">
+          <div class="flex gap-4">
             <div
-              class="ml-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-l-3xl border-2 border-gray-300 p-6"
+              class="ml-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
             >
               <p class="text-gray-500" id="preview">
                 <span class="text-xl font-semibold">Transcription</span> <br />
@@ -163,7 +160,7 @@
             </div>
             <!-- summary area -->
             <div
-              class="mr-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-r-3xl border-2 border-l-0 border-gray-300 p-6"
+              class="mr-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
             >
               <p class="text-gray-500" id="summary">
                 <span class="text-xl font-semibold">Summary</span> <br />
@@ -176,7 +173,7 @@
 
       <!-- stop listening modal -->
       <dialog id="my_modal_1" class="modal">
-        <div class="modal-box rounded-2xl">
+        <div class="modal-box">
           <p class="py-4">Are you sure you want to "Stop Listening"?</p>
           <div class="modal-action">
             <form method="dialog" class="space-x-1">
@@ -243,6 +240,7 @@
   let isAlreadyStart = false;
   let micProcessor = null;
   let micStream = null;
+  let mintaPreview = "";
   let ws = null;
   let raw_input = "",
     raw_start = "",
@@ -279,7 +277,7 @@
     }
   }, 1000);
 
-  async function preview() {
+  async function preview(mintaPreview) {
     previewDiv.innerHTML = loadingDiv;
     const end_datetime = document.getElementById("time_2").value;
     const start_datetime = document.getElementById("time_1").value;
@@ -293,8 +291,11 @@
         body: formData,
       });
       const result = await response.json();
+      if (mintaPreview === "mintaPreview")
+        handleSummarize(result.transcript, start_datetime, end_datetime);
+      console.log(mintaPreview === "mintaPreview");
       previewDiv.textContent = result.transcript;
-      previewDiv.classList = "text-black";
+      previewDiv.classList = "text-black text-sm";
     } catch (error) {
       console.error(error);
       previewDiv.innerHTML = `
@@ -304,7 +305,7 @@
       `;
       onAlertDiv.className = "toast";
       onErrorDiv.className =
-        "alert alert-error text-white flex gap-2 fill-white rounded-2xl text-sm";
+        "alert alert-error text-white flex gap-2 fill-white text-sm";
       setTimeout(() => {
         onAlertDiv.className = "hidden";
         onErrorDiv.className = "hidden";
@@ -323,7 +324,7 @@
   ) => {
     interimDiv.innerHTML = "";
     onAlertDiv.className = "toast";
-    alertClass.className = `alert ${messageClass} flex gap-2 fill-white rounded-2xl text-sm`;
+    alertClass.className = `alert ${messageClass} flex gap-2 fill-white text-sm`;
 
     setTimeout(() => {
       alertClass.className = "hidden";
@@ -351,50 +352,48 @@
 
   function resetSummarizeButton() {
     summarizeButtonDiv.innerHTML = `
-    <i class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"></i>Summarize
-    with AI
-    `;
+    <i class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"></i>Generate Summary`;
     summarizeButtonDiv.classList.remove("btn-disabled");
   }
 
-  function summarize(slug) {
-    const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
-    summaryDiv.innerHTML = loadingSpinner;
-    summarizeButtonDiv.classList.add("btn-disabled");
-    summarizeButtonDiv.innerHTML = loadingSpinner;
-    const socket = new WebSocket(`ws://localhost:8000${slug}`);
+  // function summarize(slug) {
+  // const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
+  // summaryDiv.innerHTML = loadingSpinner;
+  // summarizeButtonDiv.classList.add("btn-disabled");
+  // summarizeButtonDiv.innerHTML = loadingSpinner;
+  //   const socket = new WebSocket(`ws://localhost:8000${slug}`);
 
-    socket.onopen = () => {
-      const formatDate = (id) =>
-        `${new Date().toLocaleDateString("id-ID").replace(/\//g, "-")} ${document.getElementById(id).value}`;
-      socket.send(
-        JSON.stringify({
-          start_datetime: formatDate("time_1"),
-          end_datetime: formatDate("time_2"),
-        }),
-      );
-    };
+  //   socket.onopen = () => {
+  //     const formatDate = (id) =>
+  //       `${new Date().toLocaleDateString("id-ID").replace(/\//g, "-")} ${document.getElementById(id).value}`;
+  //     socket.send(
+  //       JSON.stringify({
+  //         start_datetime: formatDate("time_1"),
+  //         end_datetime: formatDate("time_2"),
+  //       }),
+  //     );
+  //   };
 
-    socket.onmessage = ({ data }) => {
-      const response = JSON.parse(data);
-      summaryDiv.innerHTML = response.summary;
-      summaryDiv.classList = "text-black";
-      resetSummarizeButton();
-    };
+  //   socket.onmessage = ({ data }) => {
+  //     const response = JSON.parse(data);
+  //     summaryDiv.innerHTML = response.summary;
+  //     summaryDiv.classList = "text-black";
+  //     resetSummarizeButton();
+  //   };
 
-    socket.onerror = () =>
-      handleWebSocketCloseOrError(
-        "alert-error text-white",
-        onErrorDiv,
-        "summary",
-      );
-    socket.onclose = () =>
-      handleWebSocketCloseOrError(
-        "alert-warning text-black",
-        onCloseDiv,
-        "summary",
-      );
-  }
+  //   socket.onerror = () =>
+  //     handleWebSocketCloseOrError(
+  //       "alert-error text-white",
+  //       onErrorDiv,
+  //       "summary",
+  //     );
+  //   socket.onclose = () =>
+  //     handleWebSocketCloseOrError(
+  //       "alert-warning text-black",
+  //       onCloseDiv,
+  //       "summary",
+  //     );
+  // }
 
   async function cleanupAudioResources() {
     micProcessor?.disconnect();
@@ -440,7 +439,7 @@
             raw_input += `${transcriptChar.transcription} `;
             finalDiv.innerHTML += `
             <p>
-              <span class="font-semibold">${transcriptChar.transcription}</span><br /><span
+              <span>${transcriptChar.transcription}</span><br /><span
                 class="text-xs text-gray-500"
                 >${timestamp}</span
               >
@@ -540,13 +539,19 @@
     }
   }
 
-  async function handleSummarize() {
+  async function handleSummarize(mintaPreview, start_datetime, end_datetime) {
     const API_BASE_URL = "http://192.168.1.50:19110/api";
     const formData = new FormData();
-    formData.append("raw_input", raw_input);
-    formData.append("raw_start", raw_start);
-    formData.append("raw_end", raw_end);
+    formData.append("raw_input", mintaPreview ? mintaPreview : raw_input);
+    formData.append("raw_start", start_datetime ? start_datetime : raw_start);
+    formData.append("raw_end", end_datetime ? end_datetime : raw_end);
     formData.append("id_room", "0");
+    formData.append("username", localStorage.getItem("result"));
+    formData.append("engine", "vertex_flash_15_200");
+    const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
+    summaryDiv.innerHTML = loadingSpinner;
+    summarizeButtonDiv.classList.add("btn-disabled");
+    summarizeButtonDiv.innerHTML = loadingSpinner;
 
     try {
       const response = await fetch(`${API_BASE_URL}/transcribe/summarize`, {
@@ -556,9 +561,16 @@
       });
 
       const res = await response.json();
-      summaryDiv.textContent = res.result.response;
+      summaryDiv.innerHTML = `<p class="text-black text-sm">${res.result.response}</p>`;
+      resetSummarizeButton();
     } catch (e) {
       console.error(e);
+      resetSummarizeButton();
+      handleWebSocketCloseOrError(
+        "alert-error text-white",
+        onErrorDiv,
+        "summary",
+      );
     }
   }
 </script>
