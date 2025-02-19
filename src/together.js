@@ -1,6 +1,7 @@
 const username = localStorage.getItem("result");
 const meetingName = localStorage.getItem("meetingName");
 const meetingTopic = localStorage.getItem("meetingTopic");
+const id = localStorage.getItem("id");
 
 function logout(condition) {
   if (condition === "auto" && username) {
@@ -16,7 +17,7 @@ function logout(condition) {
     (condition === "auto" && !username)
   ) {
     if (condition === "press") {
-      const items = ["result", "meetingName", "meetingTopic"];
+      const items = ["result", "meetingName", "meetingTopic", "id"];
       items.forEach((item) => localStorage.removeItem(item));
     }
 

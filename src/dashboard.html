@@ -44,6 +44,7 @@
             <tr>
               <th></th>
               <th>Meeting Name</th>
+              <th>Date</th>
               <!-- Room Name -->
               <!-- <th>ID</th>
               <th>Is Enabled?</th> -->
@@ -83,9 +84,9 @@
                 <tr>
                   <!-- <th>ID</th>
                   <th>ID Room</th> -->
-                  <th>Date</th>
                   <th>Start Time</th>
                   <th>End Time</th>
+                  <th>Date</th>
                   <th>Created By</th>
                 </tr>
               </thead>
@@ -126,7 +127,7 @@
                 ></textarea>
               </label>
             </div>
-            <button type="submit" value="submit" class="btn w-full">
+            <button type="submit" value="submit" class="btn btn-neutral w-full">
               Submit
             </button>
           </form>
@@ -162,6 +163,7 @@
             formData.get(key),
           );
         });
+        localStorage.setItem("id", res.result.id);
         location.replace("/src/client.html");
       }
     } catch (e) {
@@ -197,10 +199,11 @@
     <tr>
       <th>${index + 1}</th>
       <td>${item.ROOM_NAME}</td>
-      <!-- <td>${item.ID}</td>
-      <td>${item.IS_ENABLED}</td> -->
+      <td>${item.CREATED_ON}</td>
+      <td>${item.ID}</td>
+      <td>${item.IS_ENABLED}</td>
       <td class="flex justify-end">
-        <button class="btn !bg-[#16A34A] !text-white" onclick="renderTableSummary('${username}'); my_modal_1.showModal();">
+        <button class="btn !bg-[#16A34A] !text-white" onclick="renderTableSummary('${username}', '${item.ID}'); my_modal_1.showModal();">
           Summary
         </button>
       </td>
@@ -210,9 +213,10 @@
       .join("");
   }
 
-  async function renderTableSummary(createdBy) {
-    const data = await fetchData("summary/0");
+  async function renderTableSummary(createdBy, meetingId) {
+    const data = await fetchData(`summary/${meetingId}`);
     const tableSummary = document.getElementById("table_summary");
+    tableSummary.innerHTML = "";
     if (!data.length) return;
 
     tableSummary.innerHTML = data
@@ -220,14 +224,12 @@
       .map(
         (item) => `
       <tr>
-        <!-- <th>${item.ID}</th>
-        <th>${item.ID_ROOM}</th> -->
         <td>${item.RAW_START_TIME}</td>
         <td>${item.RAW_END_TIME}</td>
         <td>${item.CREATED_ON}</td>
         <td>${item.CREATED_BY}</td>
         <td class="flex justify-end">
-          <button class="btn btn-square !bg-[#16A34A] !text-white" onclick="renderSummary(${item.ID}); my_modal_2.showModal();">
+          <button class="btn btn-square !bg-[#16A34A] !text-white" onclick="renderSummary('${item.ID}', '${meetingId}'); my_modal_2.showModal();">
             <i class="fa-solid fa-eye"></i>
           </button>
         </td>
@@ -237,11 +239,13 @@
       .join("");
   }
 
-  async function renderSummary(id) {
+  async function renderSummary(id, meetingId) {
     const summaryElement = document.getElementById("summary");
-    const data = await fetchData(`summary/0/${id}`);
+    const data = await fetchData(`summary/${meetingId}/${id}`);
+    console.log(meetingId);
     if (!data.length) return;
 
+    summaryElement.innerHTML = "";
     summaryElement.innerHTML = data[0].SUMMARIZED_OUTPUT;
   }
 

@@ -32,7 +32,7 @@
           <!-- information bar -->
           <div class="h-[15vh]">
             <div
-              class="z-50 flex h-[15vh] w-full items-center justify-between px-10"
+              class="z-50 flex h-[15vh] w-full items-center justify-between px-8"
             >
               <button
                 onclick="my_modal_3.showModal()"
@@ -49,7 +49,7 @@
           <!-- transcription result -->
           <div class="h-[70vh] !overflow-auto">
             <div class="relative flex h-full flex-col justify-end">
-              <div class="space-y-6 overflow-auto px-10" id="transcription">
+              <div class="space-y-6 overflow-auto px-8" id="transcription">
                 <div id="getDate"></div>
                 <p>
                   <span class="text-sm" id="final"></span>
@@ -60,7 +60,7 @@
           </div>
 
           <div class="fixed bottom-0 h-[15vh] w-[35%]">
-            <div class="flex h-[15vh] items-center justify-between px-10">
+            <div class="flex h-[15vh] items-center justify-between px-8">
               <!-- start record -->
               <button
                 class="btn btn-primary w-fit flex-none"
@@ -77,33 +77,39 @@
               <div class="flex items-center gap-2">
                 <!-- pause record -->
                 <button
-                  class="btn btn-info hidden !text-white"
+                  class="btn btn-square btn-info hidden !text-white"
                   id="pauseListening"
-                  onclick="startAndStopListening('pause')"
+                  onclick="startAndStopListening('stop')"
                 >
                   <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
-                  Pause
                 </button>
 
                 <!-- stop record -->
                 <button
-                  class="btn btn-disabled btn-error hidden !text-white"
+                  class="btn btn-disabled btn-square btn-error hidden !text-white"
                   id="stopListening"
-                  onclick="my_modal_1.showModal()"
+                  onclick="startAndStopListening('stop')"
                 >
                   <i class="fa-solid fa-stop fa-sm" style="color: #ffffff"></i>
-                  Stop
                 </button>
 
                 <p class="hidden" id="countdown">3:30:00</p>
               </div>
 
-              <button
-                class="btn btn-circle btn-outline btn-sm"
-                onclick="scrollToBottom()"
-              >
-                <i class="fa-solid fa-angles-down"></i>
-              </button>
+              <div class="space-x-2">
+                <button
+                  class="btn btn-error !bg-[#c8102e] !text-white"
+                  onclick="my_modal_1.showModal()"
+                >
+                  End Meeting
+                </button>
+                <button
+                  class="btn btn-circle btn-outline btn-sm"
+                  onclick="scrollToBottom()"
+                >
+                  <i class="fa-solid fa-angles-down"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -113,27 +119,47 @@
       <div class="mx-auto flex w-[65%]" id="rideSide">
         <!-- time picker -->
         <div class="w-full">
-          <div class="flex gap-2 p-6 pb-4" id="formheight">
-            <div class="flex w-1/2 justify-between">
-              <div class="flex gap-2">
-                <input
-                  type="time"
-                  id="time_1"
-                  class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                  required
-                />
-                <input
-                  type="time"
-                  id="time_2"
-                  class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                  onchange="preview('')"
-                  required
-                />
-              </div>
-              <button class="btn btn-neutral" onclick="preview('')">
-                Preview Data
-              </button>
+          <div class="flex gap-2 p-6" id="formheight">
+            <input
+              type="time"
+              id="time_1"
+              class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              required
+            />
+            <input
+              type="time"
+              id="time_2"
+              class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              onchange="preview('')"
+              required
+            />
+          </div>
+
+          <!-- preview area -->
+          <div class="flex gap-4">
+            <div
+              class="ml-6 h-[calc(100vh-186px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
+            >
+              <p class="text-gray-500" id="preview">
+                <span class="text-xl font-semibold">Transcription</span> <br />
+                Transcription will appear here
+              </p>
             </div>
+            <!-- summary area -->
+            <div
+              class="mr-6 h-[calc(100vh-186px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
+            >
+              <p class="text-gray-500" id="summary">
+                <span class="text-xl font-semibold">Summary</span> <br />
+                Summary will appear here
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-center gap-2 p-6">
+            <button class="btn btn-neutral" onclick="preview('')">
+              Preview Data
+            </button>
             <button
               class="btn h-full w-fit min-w-[188px] !bg-[#16A34A] !text-white"
               type="submit"
@@ -147,43 +173,22 @@
               Generate Summary
             </button>
           </div>
-
-          <!-- preview area -->
-          <div class="flex gap-4">
-            <div
-              class="ml-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
-            >
-              <p class="text-gray-500" id="preview">
-                <span class="text-xl font-semibold">Transcription</span> <br />
-                Transcription will appear here
-              </p>
-            </div>
-            <!-- summary area -->
-            <div
-              class="mr-6 h-[calc(100vh-88px-24px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
-            >
-              <p class="text-gray-500" id="summary">
-                <span class="text-xl font-semibold">Summary</span> <br />
-                Summary will appear here
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
       <!-- stop listening modal -->
       <dialog id="my_modal_1" class="modal">
         <div class="modal-box">
-          <p class="py-4">Are you sure you want to "Stop Listening"?</p>
+          <p class="py-4">Are you sure you want to "End Meeting"?</p>
           <div class="modal-action">
             <form method="dialog" class="space-x-1">
               <button
-                class="btn btn-outline btn-error btn-sm rounded-xl hover:!text-white"
-                onclick="startAndStopListening('stop')"
+                class="btn btn-outline btn-error btn-sm hover:!text-white"
+                onclick="startAndStopListening('end')"
               >
                 Yes
               </button>
-              <button class="btn btn-outline btn-sm rounded-xl">Cancel</button>
+              <button class="btn btn-outline btn-sm">Cancel</button>
             </form>
           </div>
         </div>
@@ -293,7 +298,6 @@
       const result = await response.json();
       if (mintaPreview === "mintaPreview")
         handleSummarize(result.transcript, start_datetime, end_datetime);
-      console.log(mintaPreview === "mintaPreview");
       previewDiv.textContent = result.transcript;
       previewDiv.classList = "text-black text-sm";
     } catch (error) {
@@ -446,6 +450,7 @@
             </p>
             <br />
             `;
+            handleLog(transcriptChar.transcription);
           }
           if (transcriptChar.status === "warning") {
             await startAndStopListening("stop");
@@ -520,14 +525,21 @@
         console.error(error);
         await cleanupAudioResources();
       }
-    } else if (command === "stop") {
+    } else if (command === "stop" || command === "end") {
       raw_end = new Date();
       isAlreadyStart = false;
       await cleanupAudioResources();
       resetWebSocket();
       handleStop();
       await handleSummarize();
-      console.log(raw_input, raw_start, raw_end);
+      if (
+        command === "end" &&
+        !window.location.href.includes("/src/dashboard.html")
+      ) {
+        if (!window.location.href.includes("/src/dashboard.html")) {
+          location.replace("/src/dashboard.html");
+        }
+      }
     } else if (command === "pause") {
       isAlreadyStart = true;
       micStream?.getTracks().forEach((track) => track.stop());
@@ -571,6 +583,32 @@
         onErrorDiv,
         "summary",
       );
+    }
+  }
+
+  async function handleLog(isi_mentah) {
+    const API_BASE_URL = "http://192.168.1.50:19110/api";
+    console.log(`${API_BASE_URL}/transcribe/log/${username}/${id}`);
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("meeting", id);
+    formData.append("raw_input", isi_mentah);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/transcribe/log/${username}/${id}`,
+        {
+          method: "POST",
+          // Set the FormData instance as the request body
+          body: formData,
+        },
+      );
+
+      const res = await response.json();
+      summaryDiv.innerHTML = `<p class="text-black text-sm">${res.result.response}</p>`;
+      resetSummarizeButton();
+    } catch (e) {
+      console.error(e);
     }
   }
 </script>
