@@ -77,28 +77,20 @@
               <div class="flex items-center gap-2">
                 <!-- pause record -->
                 <button
-                  class="btn btn-square btn-info hidden !text-white"
-                  id="pauseListening"
-                  onclick="startAndStopListening('stop')"
-                >
-                  <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
-                </button>
-
-                <!-- stop record -->
-                <button
-                  class="btn btn-disabled btn-square btn-error hidden !text-white"
+                  class="btn btn-disabled btn-info hidden !text-white"
                   id="stopListening"
                   onclick="startAndStopListening('stop')"
                 >
-                  <i class="fa-solid fa-stop fa-sm" style="color: #ffffff"></i>
+                  <i class="fa-solid fa-pause fa-sm" style="color: #ffffff"></i>
+                  Pause
                 </button>
 
-                <p class="hidden" id="countdown">3:30:00</p>
+                <!-- <p class="hidden" id="countdown">3:30:00</p> -->
               </div>
 
               <div class="space-x-2">
                 <button
-                  class="btn btn-error !bg-[#c8102e] !text-white"
+                  class="btn btn-error !text-white"
                   onclick="my_modal_1.showModal()"
                 >
                   End Meeting
@@ -119,26 +111,31 @@
       <div class="mx-auto flex w-[65%]" id="rideSide">
         <!-- time picker -->
         <div class="w-full">
-          <div class="flex gap-2 p-6" id="formheight">
-            <input
-              type="time"
-              id="time_1"
-              class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-              required
-            />
-            <input
-              type="time"
-              id="time_2"
-              class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-              onchange="preview('')"
-              required
-            />
+          <div class="flex w-1/2 justify-between p-6 pr-0" id="formheight">
+            <div class="flex gap-2">
+              <input
+                type="time"
+                id="time_1"
+                class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                required
+              />
+              <input
+                type="time"
+                id="time_2"
+                class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                onchange="preview('')"
+                required
+              />
+            </div>
+            <button class="btn btn-neutral" onclick="preview('')">
+              Preview Data
+            </button>
           </div>
 
           <!-- preview area -->
           <div class="flex gap-4">
             <div
-              class="ml-6 h-[calc(100vh-186px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
+              class="ml-6 h-[calc(100vh-192px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
             >
               <p class="text-gray-500" id="preview">
                 <span class="text-xl font-semibold">Transcription</span> <br />
@@ -147,7 +144,7 @@
             </div>
             <!-- summary area -->
             <div
-              class="mr-6 h-[calc(100vh-186px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
+              class="mr-6 h-[calc(100vh-192px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
             >
               <p class="text-gray-500" id="summary">
                 <span class="text-xl font-semibold">Summary</span> <br />
@@ -156,17 +153,13 @@
             </div>
           </div>
 
-          <div class="flex items-center justify-center gap-2 p-6">
-            <button class="btn btn-neutral" onclick="preview('')">
-              Preview Data
-            </button>
+          <div class="flex items-center justify-center p-6">
             <button
-              class="btn h-full w-fit min-w-[188px] !bg-[#16A34A] !text-white"
+              class="btn h-full min-w-[188px] !bg-[#16A34A] !text-white"
               type="submit"
               id="summarizeButton"
               onclick="preview('mintaPreview')"
             >
-              <!-- onclick="summarize('/summarizer')" -->
               <i
                 class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
               ></i>
@@ -212,10 +205,7 @@
     <div class="hidden" id="alert">
       <div class="hidden" id="onerror">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <span
-          >The WebSocket connection is error. Please contact
-          administrator.</span
-        >
+        <span>The program is error. Please contact administrator.</span>
       </div>
       <div class="hidden" id="onclose">
         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -234,7 +224,7 @@
   const onAlertDiv = document.getElementById("alert");
   const onCloseDiv = document.getElementById("onclose");
   const onErrorDiv = document.getElementById("onerror");
-  const pauseListening = document.getElementById("pauseListening");
+  // const pauseListening = document.getElementById("pauseListening");
   const previewDiv = document.getElementById("preview");
   const startListening = document.getElementById("startListening");
   const stopListening = document.getElementById("stopListening");
@@ -247,10 +237,9 @@
   let micStream = null;
   let mintaPreview = "";
   let ws = null;
-  let raw_input = "",
-    raw_start = "",
-    raw_end = "",
-    id_room = "";
+  let raw_input = "";
+  let isFinished = false;
+  const today = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
 
   function information() {
     const informationDiv = document.getElementById("information");
@@ -262,44 +251,53 @@
 
   information();
 
-  let countdownTime = 3 * 3600 + 30 * 60;
+  // let countdownTime = 3 * 3600 + 30 * 60;
 
-  function formatTime(seconds) {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+  // function formatTime(seconds) {
+  //   const hrs = Math.floor(seconds / 3600);
+  //   const mins = Math.floor((seconds % 3600) / 60);
+  //   const secs = seconds % 60;
 
-    return `${hrs.toString().padStart(1, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  }
+  //   return `${hrs.toString().padStart(1, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  // }
 
-  const countdownElement = document.getElementById("countdown");
-  const timer = setInterval(() => {
-    if (countdownTime <= 0) {
-      clearInterval(timer);
-    } else {
-      countdownElement.textContent = formatTime(countdownTime);
-      countdownTime--;
-    }
-  }, 1000);
+  // const countdownElement = document.getElementById("countdown");
+  // const timer = setInterval(() => {
+  //   if (countdownTime <= 0) {
+  //     clearInterval(timer);
+  //   } else {
+  //     countdownElement.textContent = formatTime(countdownTime);
+  //     countdownTime--;
+  //   }
+  // }, 1000);
 
   async function preview(mintaPreview) {
-    previewDiv.innerHTML = loadingDiv;
-    const end_datetime = document.getElementById("time_2").value;
-    const start_datetime = document.getElementById("time_1").value;
-    const today = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
+    if (mintaPreview !== "mintaPreview") {
+      previewDiv.innerHTML = loadingDiv;
+    }
+    const start_datetime = `${today} ${document.getElementById("time_1").value}`;
+    const end_datetime = `${today} ${document.getElementById("time_2").value}`;
     try {
       let formData = new FormData();
-      formData.append("start_datetime", `${today} ${start_datetime}`);
-      formData.append("end_datetime", `${today} ${end_datetime}`);
-      const response = await fetch("http://localhost:8000/preview", {
-        method: "POST",
-        body: formData,
-      });
+      formData.append("start_date", start_datetime);
+      formData.append("end_date", end_datetime);
+      const response = await fetch(
+        `http://192.168.1.50:19110/api/transcribe/log/${username}/${id}/filter`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
       const result = await response.json();
       if (mintaPreview === "mintaPreview")
-        handleSummarize(result.transcript, start_datetime, end_datetime);
-      previewDiv.textContent = result.transcript;
-      previewDiv.classList = "text-black text-sm";
+        await handleSummarize(start_datetime, end_datetime);
+      else {
+        previewDiv.textContent = result.result
+          .map((item) => item.TEXT)
+          .join(" ");
+        previewDiv.classList = "text-black text-sm";
+      }
     } catch (error) {
       console.error(error);
       previewDiv.innerHTML = `
@@ -412,15 +410,15 @@
   }
 
   function handleStop() {
-    countdownElement.classList.add("hidden");
-    countdownTime = 3 * 3600 + 30 * 60;
+    // countdownElement.classList.add("hidden");
+    // countdownTime = 3 * 3600 + 30 * 60;
     startListening.classList.remove("hidden");
     startListening.innerHTML = `
     <i class="fa-solid fa-microphone fa-sm" style="color: #ffffff"></i> Start
     Listening
     `;
     stopListening.classList.add("hidden");
-    pauseListening.classList.add("hidden");
+    // pauseListening.classList.add("hidden");
   }
 
   async function delay(ms) {
@@ -486,12 +484,11 @@
 
   async function startAndStopListening(command) {
     if (command === "start") {
-      raw_start = new Date();
-      countdownElement.classList.remove("hidden");
+      // countdownElement.classList.remove("hidden");
       getDateDiv.innerHTML = `<div class="badge badge-ghost">${new Date().toString().split(" GMT")[0]}</div>`;
       startListening.classList.add("hidden");
       stopListening.classList.remove("btn-disabled", "hidden");
-      pauseListening.classList.remove("hidden", "btn-disabled");
+      // pauseListening.classList.remove("hidden", "btn-disabled");
       try {
         if (!isAlreadyStart) {
           resetWebSocket();
@@ -526,16 +523,15 @@
         await cleanupAudioResources();
       }
     } else if (command === "stop" || command === "end") {
-      raw_end = new Date();
       isAlreadyStart = false;
       await cleanupAudioResources();
       resetWebSocket();
       handleStop();
-      await handleSummarize();
       if (
         command === "end" &&
         !window.location.href.includes("/src/dashboard.html")
       ) {
+        await handleSummarize(`${today} 00:00:00`, `${today} 23:59:59`);
         if (!window.location.href.includes("/src/dashboard.html")) {
           location.replace("/src/dashboard.html");
         }
@@ -547,18 +543,21 @@
       startListening.classList.remove("hidden");
       startListening.innerHTML = `<i class="fa-solid fa-play fa-sm" style="color: #ffffff"></i>Continue Listening`;
       stopListening.classList.add("hidden");
-      pauseListening.classList.add("hidden");
+      // pauseListening.classList.add("hidden");
     }
   }
 
-  async function handleSummarize(mintaPreview, start_datetime, end_datetime) {
+  async function handleSummarize(start_datetime, end_datetime) {
     const API_BASE_URL = "http://192.168.1.50:19110/api";
     const formData = new FormData();
-    formData.append("raw_input", mintaPreview ? mintaPreview : raw_input);
-    formData.append("raw_start", start_datetime ? start_datetime : raw_start);
-    formData.append("raw_end", end_datetime ? end_datetime : raw_end);
-    formData.append("id_room", "0");
-    formData.append("username", localStorage.getItem("result"));
+    formData.append(
+      "start_date",
+      start_datetime ? start_datetime : `${today} 00:00:00`,
+    );
+    formData.append(
+      "end_date",
+      end_datetime ? end_datetime : `${today} 23:59:59`,
+    );
     formData.append("engine", "vertex_flash_15_200");
     const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
     summaryDiv.innerHTML = loadingSpinner;
@@ -566,15 +565,19 @@
     summarizeButtonDiv.innerHTML = loadingSpinner;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/transcribe/summarize`, {
-        method: "POST",
-        // Set the FormData instance as the request body
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/transcribe/summary/${username}/${id}/summarize`,
+        {
+          method: "POST",
+          // Set the FormData instance as the request body
+          body: formData,
+        },
+      );
 
       const res = await response.json();
-      summaryDiv.innerHTML = `<p class="text-black text-sm">${res.result.response}</p>`;
+      summaryDiv.innerHTML = `<p class="text-black text-sm">${res.result.response ? res.result.response : ""}</p>`;
       resetSummarizeButton();
+      isFinished = !isFinished;
     } catch (e) {
       console.error(e);
       resetSummarizeButton();
@@ -588,7 +591,6 @@
 
   async function handleLog(isi_mentah) {
     const API_BASE_URL = "http://192.168.1.50:19110/api";
-    console.log(`${API_BASE_URL}/transcribe/log/${username}/${id}`);
     const formData = new FormData();
     formData.append("username", username);
     formData.append("meeting", id);
@@ -603,10 +605,6 @@
           body: formData,
         },
       );
-
-      const res = await response.json();
-      summaryDiv.innerHTML = `<p class="text-black text-sm">${res.result.response}</p>`;
-      resetSummarizeButton();
     } catch (e) {
       console.error(e);
     }

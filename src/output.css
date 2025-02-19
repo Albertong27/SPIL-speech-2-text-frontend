@@ -2587,8 +2587,8 @@ html {
   height: 90vh;
 }
 
-.h-\[calc\(100vh-88px-24px\)\] {
-  height: calc(100vh - 88px - 24px);
+.h-\[calc\(100vh-186px\)\] {
+  height: calc(100vh - 186px);
 }
 
 .h-full {
@@ -2599,20 +2599,8 @@ html {
   height: 100vh;
 }
 
-.h-\[calc\(100vh-px\)\] {
-  height: calc(100vh - px);
-}
-
-.h-\[calc\(100vh-96px\)\] {
-  height: calc(100vh - 96px);
-}
-
 .h-\[calc\(100vh-192px\)\] {
   height: calc(100vh - 192px);
-}
-
-.h-\[calc\(100vh-186px\)\] {
-  height: calc(100vh - 186px);
 }
 
 .w-1\/2 {
@@ -2646,6 +2634,14 @@ html {
 
 .w-full {
   width: 100%;
+}
+
+.w-\[400px\] {
+  width: 400px;
+}
+
+.w-\[200px\] {
+  width: 200px;
 }
 
 .min-w-\[188px\] {
@@ -2729,6 +2725,12 @@ html {
   margin-left: calc(0.25rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
 .space-y-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
@@ -2739,12 +2741,6 @@ html {
   --tw-space-y-reverse: 0;
   margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
-}
-
-.space-x-2 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-x-reverse: 0;
-  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
-  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .\!overflow-auto {
@@ -2767,18 +2763,6 @@ html {
   border-radius: 0.5rem;
 }
 
-.rounded-xl {
-  border-radius: 0.75rem;
-}
-
-.rounded {
-  border-radius: 0.25rem;
-}
-
-.rounded-full {
-  border-radius: 9999px;
-}
-
 .border {
   border-width: 1px;
 }
@@ -2793,14 +2777,14 @@ html {
   background-color: rgb(22 163 74 / var(--tw-bg-opacity, 1)) !important;
 }
 
-.bg-gray-50 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
-}
-
 .\!bg-\[\#c8102e\] {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(200 16 46 / var(--tw-bg-opacity, 1)) !important;
+}
+
+.bg-gray-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
 }
 
 .\!fill-neutral {
@@ -2823,9 +2807,9 @@ html {
   padding: 1.5rem;
 }
 
-.px-10 {
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
+.px-8 {
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 .py-4 {
@@ -2833,22 +2817,8 @@ html {
   padding-bottom: 1rem;
 }
 
-.px-6 {
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
-
-.px-8 {
-  padding-left: 2rem;
-  padding-right: 2rem;
-}
-
-.pb-4 {
-  padding-bottom: 1rem;
-}
-
-.pt-4 {
-  padding-top: 1rem;
+.pr-0 {
+  padding-right: 0px;
 }
 
 .text-right {
