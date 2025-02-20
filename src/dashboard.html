@@ -127,7 +127,12 @@
                 ></textarea>
               </label>
             </div>
-            <button type="submit" value="submit" class="btn btn-neutral w-full">
+            <button
+              id="createMeeting"
+              type="submit"
+              value="submit"
+              class="btn btn-neutral w-full"
+            >
               Submit
             </button>
           </form>
@@ -141,9 +146,19 @@
   const API_BASE_URL = "http://192.168.1.50:19110/api";
 
   const form = document.querySelector("#usercreatemeeting");
+  const createMeetingButtonDiv = document.getElementById("createMeeting");
+  const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
+
+  function resetSummarizeButton() {
+    summarizeButtonDiv.innerHTML = "Submit";
+    createMeetingButtonDiv.classList.remove("btn-disabled");
+  }
+
   async function sendData() {
     // Associate the FormData object with the form element
     const formData = new FormData(form);
+    createMeetingButtonDiv.classList.add("btn-disabled");
+    createMeetingButtonDiv.innerHTML = loadingSpinner;
 
     try {
       const response = await fetch(

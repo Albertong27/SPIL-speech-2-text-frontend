@@ -909,6 +909,10 @@ html {
   --tw-border-opacity: 1;
 }
 
+.\!btn-disabled {
+  pointer-events: none !important;
+}
+
 .btn-disabled,
 .btn[disabled],
 .btn:disabled {
@@ -1169,6 +1173,20 @@ html {
         black
       );
     }
+  }
+
+  .\!btn-disabled:hover {
+    --tw-border-opacity: 0 !important;
+    background-color: var(
+      --fallback-n,
+      oklch(var(--n) / var(--tw-bg-opacity))
+    ) !important;
+    --tw-bg-opacity: 0.2 !important;
+    color: var(
+      --fallback-bc,
+      oklch(var(--bc) / var(--tw-text-opacity))
+    ) !important;
+    --tw-text-opacity: 0.2 !important;
   }
 
   .btn-disabled:hover,
@@ -1858,6 +1876,20 @@ html {
   --tw-bg-opacity: 0.2;
   color: var(--fallback-bc, oklch(var(--bc) / var(--tw-text-opacity)));
   --tw-text-opacity: 0.2;
+}
+
+.btn.\!btn-disabled {
+  --tw-border-opacity: 0 !important;
+  background-color: var(
+    --fallback-n,
+    oklch(var(--n) / var(--tw-bg-opacity))
+  ) !important;
+  --tw-bg-opacity: 0.2 !important;
+  color: var(
+    --fallback-bc,
+    oklch(var(--bc) / var(--tw-text-opacity))
+  ) !important;
+  --tw-text-opacity: 0.2 !important;
 }
 
 .btn:is(input[type="checkbox"]:checked),
@@ -2634,6 +2666,18 @@ html {
 
 .min-w-\[188px\] {
   min-width: 188px;
+}
+
+.min-w-\[48px\] {
+  min-width: 48px;
+}
+
+.min-w-\[82px\] {
+  min-width: 82px;
+}
+
+.min-w-\[140px\] {
+  min-width: 140px;
 }
 
 .max-w-none {

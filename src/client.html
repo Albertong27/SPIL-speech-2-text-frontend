@@ -77,7 +77,7 @@
               <div class="flex items-center gap-2">
                 <!-- pause record -->
                 <button
-                  class="btn btn-disabled btn-info hidden !text-white"
+                  class="btn !btn-disabled btn-info hidden !text-white"
                   id="stopListening"
                   onclick="startAndStopListening('stop')"
                 >
@@ -90,9 +90,11 @@
 
               <div class="space-x-2">
                 <button
-                  class="btn btn-error !text-white"
+                  id="endmeeting"
+                  class="btn btn-error min-w-[140px] !text-white"
                   onclick="my_modal_1.showModal()"
                 >
+                  <i class="fa-solid fa-arrow-left"></i>
                   End Meeting
                 </button>
                 <button
@@ -238,8 +240,9 @@
   let mintaPreview = "";
   let ws = null;
   let raw_input = "";
-  let isFinished = false;
   const today = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
+  const endMeetingDiv = document.getElementById("endmeeting");
+  const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
 
   function information() {
     const informationDiv = document.getElementById("information");
@@ -355,7 +358,7 @@
   function resetSummarizeButton() {
     summarizeButtonDiv.innerHTML = `
     <i class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"></i>Generate Summary`;
-    summarizeButtonDiv.classList.remove("btn-disabled");
+    summarizeButtonDiv.classList.remove("!btn-disabled");
   }
 
   // function summarize(slug) {
@@ -487,7 +490,7 @@
       // countdownElement.classList.remove("hidden");
       getDateDiv.innerHTML = `<div class="badge badge-ghost">${new Date().toString().split(" GMT")[0]}</div>`;
       startListening.classList.add("hidden");
-      stopListening.classList.remove("btn-disabled", "hidden");
+      stopListening.classList.remove("!btn-disabled", "hidden");
       // pauseListening.classList.remove("hidden", "btn-disabled");
       try {
         if (!isAlreadyStart) {
@@ -531,9 +534,21 @@
         command === "end" &&
         !window.location.href.includes("dashboard.html")
       ) {
+        endMeetingDiv.innerHTML = loadingDiv;
+        endMeetingDiv.classList.add("!btn-disabled");
         await handleSummarize(`${today} 00:00:00`, `${today} 23:59:59`);
-        if (!window.location.href.includes("dashboard.html")) {
-          location.replace("dashboard.html");
+        const items = ["meetingName", "meetingTopic", "id"];
+        items.forEach((item) => localStorage.removeItem(item));
+        try {
+          if (!window.location.href.includes("dashboard.html")) {
+            location.replace("dashboard.html");
+          }
+          endMeetingDiv.innerHTML = `<i class="fa-solid fa-arrow-left"></i> End Meeting`;
+          endMeetingDiv.classList.remove("!btn-disabled");
+        } catch (e) {
+          console.error(e);
+          endMeetingDiv.innerHTML = `<i class="fa-solid fa-arrow-left"></i> End Meeting`;
+          endMeetingDiv.classList.remove("!btn-disabled");
         }
       }
     } else if (command === "pause") {
@@ -559,9 +574,8 @@
       end_datetime ? end_datetime : `${today} 23:59:59`,
     );
     formData.append("engine", "vertex_flash_15_200");
-    const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
+    summarizeButtonDiv.classList.add("!btn-disabled");
     summaryDiv.innerHTML = loadingSpinner;
-    summarizeButtonDiv.classList.add("btn-disabled");
     summarizeButtonDiv.innerHTML = loadingSpinner;
 
     try {
@@ -577,7 +591,6 @@
       const res = await response.json();
       summaryDiv.innerHTML = `<p class="text-black text-sm">${res.result.response ? res.result.response : ""}</p>`;
       resetSummarizeButton();
-      isFinished = !isFinished;
     } catch (e) {
       console.error(e);
       resetSummarizeButton();
