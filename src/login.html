@@ -102,7 +102,7 @@
 
       const res = await response.json();
       if (res.status === "success") {
-        localStorage.setItem("result", res.result.USERNAME);
+        localStorage.setItem("result", res.result[0].USERNAME);
         location.replace("dashboard.html");
       }
     } catch (e) {
