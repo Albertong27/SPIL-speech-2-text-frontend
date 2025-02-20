@@ -529,11 +529,11 @@
       handleStop();
       if (
         command === "end" &&
-        !window.location.href.includes("/src/dashboard.html")
+        !window.location.href.includes("dashboard.html")
       ) {
         await handleSummarize(`${today} 00:00:00`, `${today} 23:59:59`);
-        if (!window.location.href.includes("/src/dashboard.html")) {
-          location.replace("/src/dashboard.html");
+        if (!window.location.href.includes("dashboard.html")) {
+          location.replace("dashboard.html");
         }
       }
     } else if (command === "pause") {

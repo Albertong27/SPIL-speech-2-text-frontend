@@ -6,8 +6,8 @@ const id = localStorage.getItem("id");
 function logout(condition) {
   if (condition === "auto" && username) {
     if (!meetingName && !meetingTopic) {
-      if (!window.location.href.includes("/src/dashboard.html")) {
-        location.replace("/src/dashboard.html");
+      if (!window.location.href.includes("dashboard.html")) {
+        location.replace("dashboard.html");
       }
     }
   }
@@ -21,8 +21,8 @@ function logout(condition) {
       items.forEach((item) => localStorage.removeItem(item));
     }
 
-    if (!window.location.href.includes("src/login.html")) {
-      location.replace("/src/login.html");
+    if (!window.location.href.includes("login.html")) {
+      location.replace("login.html");
     }
   }
 }
