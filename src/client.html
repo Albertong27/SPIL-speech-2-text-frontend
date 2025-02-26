@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Speech to Text</title>
+    <script
+      src="https://cdn.socket.io/3.1.3/socket.io.min.js"
+      integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh"
+      crossorigin="anonymous"
+    ></script>
 
     <!-- tailwind -->
     <link href="./input.css" rel="stylesheet" />
@@ -407,11 +412,6 @@
     micProcessor = micStream = audioContext = null;
   }
 
-  function resetWebSocket() {
-    if (ws && ws.readyState === WebSocket.OPEN) ws.close();
-    ws = null;
-  }
-
   function handleStop() {
     // countdownElement.classList.add("hidden");
     // countdownTime = 3 * 3600 + 30 * 60;
@@ -430,51 +430,68 @@
 
   function initWebSocket() {
     if (!ws) {
-      ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
-      ws.onmessage = async (event) => {
-        const { data } = event;
-        const isListening = data === "listening";
+      // ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
+      ws = io("http://localhost:8000/aws-browser-transcribe");
+      ws.on("transcription", (data) => {
+        console.log(data);
+        const isListening = data.status === "listening";
         const timestamp = new Date().toString().split(" GMT")[0];
         interimDiv.innerHTML = isListening
           ? `<span class="loading loading-dots loading-md text-gray-500"></span>`
           : "";
-        if (!isListening) {
-          const transcriptChar = JSON.parse(data);
-          if (transcriptChar.transcription) {
-            raw_input += `${transcriptChar.transcription} `;
-            finalDiv.innerHTML += `
+        // if (!isListening) {
+        // const transcriptChar = JSON.parse(data);
+        if (data.isFinal) {
+          raw_input += `${data.text} `;
+          finalDiv.innerHTML += `
             <p>
-              <span>${transcriptChar.transcription}</span><br /><span
+              <span>${data.text}</span><br /><span
                 class="text-xs text-gray-500"
                 >${timestamp}</span
               >
             </p>
             <br />
             `;
-            handleLog(transcriptChar.transcription);
-          }
-          if (transcriptChar.status === "warning") {
-            await startAndStopListening("stop");
-            await delay(5000);
-            await startAndStopListening("start");
-          }
+          handleLog(data.text);
         }
+        // if (transcriptChar.status === "warning") {
+        //   await startAndStopListening("stop");
+        //   await delay(5000);
+        //   await startAndStopListening("start");
+        // }
+        // }
         scrollToBottom();
-      };
+      });
     }
 
-    ws.onerror = () =>
+    // ws.onerror = () =>
+    //   handleWebSocketCloseOrError(
+    //     "alert-error text-white",
+    //     onErrorDiv,
+    //     "listen",
+    //   );
+    // ws.onclose = () =>
+    //   handleWebSocketCloseOrError(
+    //     "alert-warning text-black",
+    //     onCloseDiv,
+    //     "listen",
+    //   );
+
+    ws.on("error", (errorMessage) => {
+      console.error("Server error:", errorMessage);
       handleWebSocketCloseOrError(
         "alert-error text-white",
         onErrorDiv,
         "listen",
       );
-    ws.onclose = () =>
-      handleWebSocketCloseOrError(
-        "alert-warning text-black",
-        onCloseDiv,
-        "listen",
-      );
+    });
+  }
+
+  function resetWebSocket() {
+    // if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+    // ws.emit("stopTranscription");
+    if (ws && ws.connected) ws.disconnect();
+    ws = null;
   }
 
   async function initAudio() {
@@ -497,6 +514,7 @@
           resetWebSocket();
           initWebSocket();
         }
+        ws.emit("startTranscription");
         await cleanupAudioResources();
         await initAudio();
         micStream = await navigator.mediaDevices.getUserMedia({
@@ -506,20 +524,26 @@
         while (audioContext === null) {
           await initAudio();
         }
-        const source = audioContext.createMediaStreamSource(micStream);
-        micProcessor = audioContext.createScriptProcessor(4096, 1, 1);
-        source.connect(micProcessor);
-        micProcessor.connect(audioContext.destination);
+        audioContext = new AudioContext();
+        audioInput = audioContext.createMediaStreamSource(micStream);
+        processor = audioContext.createScriptProcessor(1024, 1, 1);
+        audioInput.connect(processor);
+        processor.connect(audioContext.destination);
 
-        micProcessor.onaudioprocess = (e) => {
-          if (ws && ws.readyState === WebSocket.OPEN) {
-            const inputData = e.inputBuffer.getChannelData(0);
-            const samples = new Int16Array(inputData.length);
-            for (let i = 0; i < inputData.length; i++) {
-              samples[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7fff;
-            }
-            ws.send(samples.buffer);
+        processor.onaudioprocess = (e) => {
+          const float32Array = e.inputBuffer.getChannelData(0);
+          const int16Array = new Int16Array(float32Array.length);
+          for (let i = 0; i < float32Array.length; i++) {
+            int16Array[i] = Math.max(
+              -32768,
+              Math.min(32767, Math.floor(float32Array[i] * 32768)),
+            );
           }
+          console.log(
+            "Sending audio chunk to server, size:",
+            int16Array.buffer.byteLength,
+          );
+          ws.emit("audioData", int16Array.buffer);
         };
       } catch (error) {
         console.error(error);
@@ -551,6 +575,11 @@
           endMeetingDiv.classList.remove("!btn-disabled");
         }
       }
+      handleWebSocketCloseOrError(
+        "alert-warning text-black",
+        onCloseDiv,
+        "listen",
+      );
     } else if (command === "pause") {
       isAlreadyStart = true;
       micStream?.getTracks().forEach((track) => track.stop());
