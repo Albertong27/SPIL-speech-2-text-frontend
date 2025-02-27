@@ -309,10 +309,10 @@
     } catch (error) {
       console.error(error);
       previewDiv.innerHTML = `
-      <p class="text-gray-400" id="preview">
-        Transcription summary with selected time will appear here
-      </p>
-      `;
+        <p class="text-gray-400" id="preview">
+          Transcription summary with selected time will appear here
+        </p>
+        `;
       onAlertDiv.className = "toast";
       onErrorDiv.className =
         "alert alert-error text-white flex gap-2 fill-white text-sm";
@@ -347,15 +347,15 @@
       resetWebSocket();
     } else if (type === "summary") {
       previewDiv.innerHTML = `
-      <p class="text-gray-400" id="preview">
-        Transcription summary with selected time will appear here
-      </p>
-      `;
+        <p class="text-gray-400" id="preview">
+          Transcription summary with selected time will appear here
+        </p>
+        `;
       summaryDiv.innerHTML = `
-      <p class="text-gray-400" id="summary">
-        Transcription summary with selected time will appear here
-      </p>
-      `;
+        <p class="text-gray-400" id="summary">
+          Transcription summary with selected time will appear here
+        </p>
+        `;
       resetSummarizeButton();
     }
   };
@@ -417,9 +417,9 @@
     // countdownTime = 3 * 3600 + 30 * 60;
     startListening.classList.remove("hidden");
     startListening.innerHTML = `
-    <i class="fa-solid fa-microphone fa-sm" style="color: #ffffff"></i> Start
-    Listening
-    `;
+      <i class="fa-solid fa-microphone fa-sm" style="color: #ffffff"></i> Start
+      Listening
+      `;
     stopListening.classList.add("hidden");
     // pauseListening.classList.add("hidden");
   }
@@ -430,8 +430,8 @@
 
   function initWebSocket() {
     if (!ws) {
-      // ws = new WebSocket("ws://localhost:8000/aws-browser-transcribe");
       ws = io("http://localhost:8000/aws-browser-transcribe");
+
       ws.on("transcription", (data) => {
         console.log(data);
         const isListening = data.status === "listening";
@@ -462,29 +462,44 @@
         // }
         scrollToBottom();
       });
+      // ws.onerror = () =>
+      //   handleWebSocketCloseOrError(
+      //     "alert-error text-white",
+      //     onErrorDiv,
+      //     "listen",
+      //   );
+      // ws.onclose = () =>
+      //   handleWebSocketCloseOrError(
+      //     "alert-warning text-black",
+      //     onCloseDiv,
+      //     "listen",
+      //   );
+
+      ws.on("error", (errorMessage) => {
+        console.error("Server error:", errorMessage);
+        handleWebSocketCloseOrError(
+          "alert-error text-white",
+          onErrorDiv,
+          "listen",
+        );
+      });
+
+      ws.on("disconnect", (data) => {
+        handleWebSocketCloseOrError(
+          "alert-error text-white",
+          onErrorDiv,
+          "listen",
+        );
+      });
+
+      ws.on("connect_error", (error) => {
+        handleWebSocketCloseOrError(
+          "alert-error text-white",
+          onErrorDiv,
+          "listen",
+        );
+      });
     }
-
-    // ws.onerror = () =>
-    //   handleWebSocketCloseOrError(
-    //     "alert-error text-white",
-    //     onErrorDiv,
-    //     "listen",
-    //   );
-    // ws.onclose = () =>
-    //   handleWebSocketCloseOrError(
-    //     "alert-warning text-black",
-    //     onCloseDiv,
-    //     "listen",
-    //   );
-
-    ws.on("error", (errorMessage) => {
-      console.error("Server error:", errorMessage);
-      handleWebSocketCloseOrError(
-        "alert-error text-white",
-        onErrorDiv,
-        "listen",
-      );
-    });
   }
 
   function resetWebSocket() {
@@ -618,7 +633,8 @@
       );
 
       const res = await response.json();
-      summaryDiv.innerHTML = `<p class="text-black text-sm">${res.result.response ? res.result.response : ""}</p>`;
+      summaryDiv.innerHTML = res.result.response ? res.result.response : "";
+      summaryDiv.classList = "text-black text-sm";
       resetSummarizeButton();
     } catch (e) {
       console.error(e);
