@@ -430,7 +430,7 @@
 
   function initWebSocket() {
     if (!ws) {
-      ws = io("http://localhost:8000/aws-browser-transcribe");
+      ws = io("http://localhost:16110/aws-browser-transcribe");
 
       ws.on("transcription", (data) => {
         console.log(data);
