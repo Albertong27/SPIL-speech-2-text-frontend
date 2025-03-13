@@ -182,6 +182,7 @@
         });
         localStorage.setItem("id", res.result.id);
         location.replace("client.html");
+        localStorage.setItem("isAutoStart", "TRUE");
       }
     } catch (e) {
       console.error(e);

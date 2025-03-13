@@ -27,12 +27,12 @@
   <body class="font-poppins" onload="logout('auto')">
     <section class="flex">
       <!-- left side -->
-      <div class="flex h-screen w-[35%] flex-col shadow-lg">
+      <div class="flex h-screen w-full flex-col shadow-lg">
         <div class="w-full">
           <!-- information bar -->
           <div class="h-[15vh]">
             <div
-              class="z-50 flex h-[15vh] w-full items-center justify-between px-8"
+              class="z-50 mx-auto flex h-[15vh] w-1/2 items-center justify-between px-8"
             >
               <button
                 onclick="my_modal_3.showModal()"
@@ -48,7 +48,9 @@
 
           <!-- transcription result -->
           <div class="h-[70vh] !overflow-auto">
-            <div class="relative flex h-full flex-col justify-end">
+            <div
+              class="relative mx-auto flex h-full w-1/2 flex-col justify-end"
+            >
               <div class="space-y-6 overflow-auto px-8" id="transcription">
                 <div id="getDate"></div>
                 <p>
@@ -59,8 +61,10 @@
             </div>
           </div>
 
-          <div class="fixed bottom-0 h-[15vh] w-[35%]">
-            <div class="flex h-[15vh] items-center justify-between px-8">
+          <div class="fixed bottom-0 h-[15vh] w-full">
+            <div
+              class="mx-auto flex h-[15vh] w-1/2 items-center justify-between px-8"
+            >
               <!-- start record -->
               <button
                 class="btn btn-primary w-fit flex-none"
@@ -105,68 +109,6 @@
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- right side -->
-      <div class="mx-auto flex w-[65%]" id="rideSide">
-        <!-- time picker -->
-        <div class="w-full">
-          <div class="flex w-1/2 justify-between p-6 pr-0" id="formheight">
-            <div class="flex gap-2">
-              <input
-                type="time"
-                id="time_1"
-                class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                required
-              />
-              <input
-                type="time"
-                id="time_2"
-                class="block w-fit rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-none text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                onchange="preview('')"
-                required
-              />
-            </div>
-            <button class="btn btn-neutral" onclick="preview('')">
-              Preview Data
-            </button>
-          </div>
-
-          <!-- preview area -->
-          <div class="flex gap-4">
-            <div
-              class="ml-6 h-[calc(100vh-192px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
-            >
-              <p class="text-gray-500" id="preview">
-                <span class="text-xl font-semibold">Transcription</span> <br />
-                Transcription will appear here
-              </p>
-            </div>
-            <!-- summary area -->
-            <div
-              class="mr-6 h-[calc(100vh-192px)] w-1/2 overflow-auto rounded-2xl p-6 shadow-lg"
-            >
-              <p class="text-gray-500" id="summary">
-                <span class="text-xl font-semibold">Summary</span> <br />
-                Summary will appear here
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-center p-6">
-            <button
-              class="btn h-full min-w-[188px] !bg-[#16A34A] !text-white"
-              type="submit"
-              id="summarizeButton"
-              onclick="preview('mintaPreview')"
-            >
-              <i
-                class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"
-              ></i>
-              Generate Summary
-            </button>
           </div>
         </div>
       </div>
@@ -230,8 +172,8 @@
   const previewDiv = document.getElementById("preview");
   const startListening = document.getElementById("startListening");
   const stopListening = document.getElementById("stopListening");
-  const summarizeButtonDiv = document.getElementById("summarizeButton");
-  const summaryDiv = document.getElementById("summary");
+  // const summarizeButtonDiv = document.getElementById("summarizeButton");
+  // const summaryDiv = document.getElementById("summary");
   const transcriptionDiv = document.getElementById("transcription");
   let audioContext = null;
   let isAlreadyStart = false;
@@ -243,6 +185,11 @@
   const today = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
   const endMeetingDiv = document.getElementById("endmeeting");
   const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
+
+  if (localStorage.getItem("isAutoStart") === "TRUE") {
+    startAndStopListening("start");
+    localStorage.removeItem("isAutoStart");
+  }
 
   function information() {
     const informationDiv = document.getElementById("information");
@@ -346,20 +293,15 @@
         Transcription summary with selected time will appear here
       </p>
       `;
-      summaryDiv.innerHTML = `
-      <p class="text-gray-400" id="summary">
-        Transcription summary with selected time will appear here
-      </p>
-      `;
-      resetSummarizeButton();
+      // resetSummarizeButton();
     }
   };
 
-  function resetSummarizeButton() {
-    summarizeButtonDiv.innerHTML = `
-    <i class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"></i>Generate Summary`;
-    summarizeButtonDiv.classList.remove("!btn-disabled");
-  }
+  // function resetSummarizeButton() {
+  //   summarizeButtonDiv.innerHTML = `
+  //   <i class="fa-solid fa-wand-magic-sparkles fa-sm !fill-neutral"></i>Generate Summary`;
+  //   summarizeButtonDiv.classList.remove("!btn-disabled");
+  // }
 
   // function summarize(slug) {
   // const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
@@ -574,9 +516,9 @@
       end_datetime ? end_datetime : `${today} 23:59:59`,
     );
     formData.append("engine", "vertex_flash_15_200");
-    summarizeButtonDiv.classList.add("!btn-disabled");
-    summaryDiv.innerHTML = loadingSpinner;
-    summarizeButtonDiv.innerHTML = loadingSpinner;
+    // summarizeButtonDiv.classList.add("!btn-disabled");
+    // summaryDiv.innerHTML = loadingSpinner;
+    // summarizeButtonDiv.innerHTML = loadingSpinner;
 
     try {
       const response = await fetch(
@@ -589,11 +531,11 @@
       );
 
       const res = await response.json();
-      summaryDiv.innerHTML = `<p class="text-black text-sm">${res.result.response ? res.result.response : ""}</p>`;
-      resetSummarizeButton();
+      // summaryDiv.innerHTML = `<p class="text-black text-sm">${res.result.response ? res.result.response : ""}</p>`;
+      // resetSummarizeButton();
     } catch (e) {
       console.error(e);
-      resetSummarizeButton();
+      // resetSummarizeButton();
       handleWebSocketCloseOrError(
         "alert-error text-white",
         onErrorDiv,
