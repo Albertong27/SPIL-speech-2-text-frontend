@@ -62,7 +62,7 @@
   const myInput = document.getElementById("input");
   const myMicrophone = document.getElementById("microphone");
   const temp = myMicrophone.innerHTML;
-  myInput.addEventListener("change", () => {
+  myInput.addEventListener("input", () => {
     myMicrophone.innerHTML = myInput.value
       ? `
         <button type="submit" id="send" class="btn btn-square rounded-xl !bg-green-600 !text-white">
