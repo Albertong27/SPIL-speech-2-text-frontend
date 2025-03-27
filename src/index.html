@@ -13,11 +13,14 @@
     >
       <div
         id="chat-buble"
-        class="w-full gap-4 overflow-auto px-8 pt-8 lg:w-1/2 lg:px-0"
+        class="w-full space-y-4 overflow-auto px-8 pt-8 lg:px-0"
       ></div>
     </div>
     <div class="flex flex-col items-center justify-end gap-3 py-8">
-      <div class="w-full px-8 lg:w-1/2 lg:px-0" id="badge"></div>
+      <div
+        class="flex w-full items-center gap-2 px-8 lg:w-1/2 lg:px-0"
+        id="badge"
+      ></div>
       <form id="ask-chatbot" class="flex w-full gap-3 px-8 lg:w-1/2 lg:px-0">
         <input
           class="input w-full rounded-xl"
@@ -44,24 +47,50 @@
 </html>
 
 <script>
+  const form = document.querySelector("#ask-chatbot");
+  const myBadge = document.getElementById("badge");
+  const myChatBox = document.getElementById("chat-section");
+  const myFile = document.getElementById("file");
+  const myInput = document.getElementById("input");
+  const myMicrophone = document.getElementById("microphone");
+  const temp_microphone = myMicrophone.innerHTML;
+  let fileName;
+  let myChatBubble;
+  let temp_badge = myBadge.innerHTML;
+
+  function adjustHeight(status) {
+    const a = "h-[calc(100dvh-148px)]";
+    const b = "h-[calc(100dvh-116px)]";
+    myChatBox.classList.add(status === "enlarge" ? a : b);
+    myChatBox.classList.remove(status === "dwindle" ? a : b);
+  }
+
+  function myResetFile() {
+    myFile.value = "";
+    if (!myFile.value) {
+      fileName = "";
+      myBadge.innerHTML = temp_badge;
+    }
+    adjustHeight("dwindle");
+  }
+
   window.onload = function () {
-    document.getElementById("file").addEventListener("change", (event) => {
+    myFile.addEventListener("change", (event) => {
+      event.preventDefault();
       const files = event.target.files;
-      const fileName = files[0].name;
-      const chatBox = document.getElementById("chat-section");
-      document.getElementById("badge").innerHTML = `
+      fileName = files[0].name;
+      myBadge.innerHTML = `
         <div class="badge badge-outline badge-success">
           ${fileName.length > 30 ? `${fileName.slice(0, 30)}...` : fileName}
         </div>
+        <button onClick="myResetFile()" class="btn btn-circle btn-outline btn-error btn-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       `;
-      chatBox.classList.remove("h-[calc(100dvh-116px)]");
-      chatBox.classList.add("h-[calc(100dvh-143px)]");
+      adjustHeight("enlarge");
     });
   };
 
-  const myInput = document.getElementById("input");
-  const myMicrophone = document.getElementById("microphone");
-  const temp = myMicrophone.innerHTML;
   myInput.addEventListener("input", () => {
     myMicrophone.innerHTML = myInput.value
       ? `
@@ -69,10 +98,9 @@
           <i class="fa-solid fa-paper-plane"></i>
         </button>
       `
-      : temp;
+      : temp_microphone;
   });
 
-  const form = document.querySelector("#ask-chatbot");
   async function sendData() {
     const formData = new FormData(form);
 
@@ -80,18 +108,33 @@
       if (formData.get("string")) {
         myChatBubble = document.getElementById("chat-buble");
         myChatBubble.innerHTML += `
-          <div id="chat-buble" class="chat chat-end">
-            <div class="chat-bubble rounded-xl !bg-green-600 !text-white">${formData.get("string")}</div> 
-          </div>`;
+        ${
+          fileName
+            ? `
+            <div class="flex justify-end w-1/2 mx-auto mb-2">
+              <div class="badge badge-outline badge-success">
+                ${fileName.length > 30 ? `${fileName.slice(0, 30)}...` : fileName}
+              </div> 
+            </div>
+          `
+            : ""
+        }
+          <div id="chat-buble" class="chat chat-end mx-auto w-full lg:w-1/2">
+            <div class="chat-bubble rounded-xl !bg-green-600 !text-white">
+              ${formData.get("string")}
+            </div>
+          </div>
+        `;
         myInput.value = "";
-        myMicrophone.innerHTML = temp;
+        myMicrophone.innerHTML = temp_microphone;
+        myChatBubble.scrollTop = myChatBubble.scrollHeight;
+        myResetFile();
       }
     } catch (e) {
       console.error(e);
     }
   }
 
-  // Take over form submission
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     sendData();
