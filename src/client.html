@@ -25,6 +25,7 @@
   </head>
 
   <body class="font-poppins" onload="logout('auto')">
+    <div id="abc"></div>
     <section class="flex">
       <!-- left side -->
       <div class="flex h-screen w-full flex-col shadow-lg">
@@ -187,8 +188,33 @@
   const loadingSpinner = `<span class="loading loading-spinner loading-md"></span>`;
 
   if (localStorage.getItem("isAutoStart") === "TRUE") {
-    startAndStopListening("start");
+    // startAndStopListening("start");
+    startListening.classList.add("hidden");
+    document.getElementById("abc").innerHTML = `
+    <div class="bg-black/30 z-50 w-full h-screen fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+      <div class="modal-box absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <p class="py-4">Recording hasn't begun yet. Please click Start.</p>
+        <div class="modal-action">
+          <button
+          class="btn btn-primary w-fit flex-none"
+          id="startListeningOnLoad"
+          onclick="startAndStopListening('start'); unHideButton()"
+        >
+          <i
+            class="fa-solid fa-microphone fa-sm"
+            style="color: #ffffff"
+          ></i>
+          Start
+        </button>
+        </div>
+      </div>
+    </div>
+    `;
+  }
+
+  function unHideButton() {
     localStorage.removeItem("isAutoStart");
+    document.getElementById("abc").innerHTML = "";
   }
 
   function information() {
