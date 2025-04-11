@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="./output.css" rel="stylesheet" />
+    <link href="./css/all.min.css" rel="stylesheet" />
+    <title>Home</title>
+  </head>
+
+  <body>
+    <section class="fixed inset-x-0 bottom-8 space-y-4 px-8">
+      <div class="flex lg:justify-end">
+        <iframe
+          id="index"
+          class="!hidden w-full rounded-3xl border border-green-500 lg:w-[450px]"
+          src="./index.html"
+          height="450"
+          width="0"
+        ></iframe>
+      </div>
+      <div class="flex justify-end">
+        <button
+          id="btn"
+          onclick="emergeIndex()"
+          class="btn btn-success btn-lg btn-circle flex"
+        >
+          <i class="fa-brands fa-whatsapp" style="color: #ffffff"></i>
+        </button>
+      </div>
+    </section>
+  </body>
+</html>
+
+<script>
+  let flag = false;
+  const indexDiv = document.getElementById("index");
+  const btnDiv = document.getElementById("btn");
+  let temp = btnDiv.innerHTML;
+  function emergeIndex() {
+    if (!flag) {
+      indexDiv.classList.remove("!hidden");
+      btnDiv.classList.remove("btn-success");
+      btnDiv.classList.add("btn-error");
+      btnDiv.innerHTML = `<i class="fa-solid fa-xmark" style="color: #ffffff;"></i>`;
+    } else {
+      indexDiv.classList.add("!hidden");
+      btnDiv.classList.add("btn-success");
+      btnDiv.classList.remove("btn-error");
+      btnDiv.innerHTML = temp;
+    }
+    flag = !flag;
+  }
+</script>
